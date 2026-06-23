@@ -10,6 +10,10 @@ class StatusBarController {
     var onCaptureArea: (() -> Void)?
     var onCaptureWindow: (() -> Void)?
     var onCaptureScroll: (() -> Void)?
+    var onCaptureFullScreen: (() -> Void)?
+    var onCaptureBatch: (() -> Void)?
+    var onCaptureStream: (() -> Void)?
+    var onCaptureCamera: (() -> Void)?
     var onOpenSearch: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onQuit: (() -> Void)?
@@ -93,6 +97,14 @@ class StatusBarController {
             self?.closePopover()
             self?.onCaptureBatch?()
         }
+        popoverViewController.onCaptureStream = { [weak self] in
+            self?.closePopover()
+            self?.onCaptureStream?()
+        }
+        popoverViewController.onCaptureCamera = { [weak self] in
+            self?.closePopover()
+            self?.onCaptureCamera?()
+        }
         popoverViewController.onOpenSearch = { [weak self] in
             self?.closePopover()
             self?.onOpenSearch?()
@@ -156,6 +168,8 @@ class StatusBarPopoverViewController: NSViewController {
     var onCaptureFullScreen: (() -> Void)?
     var onCaptureScroll: (() -> Void)?
     var onCaptureBatch: (() -> Void)?
+    var onCaptureStream: (() -> Void)?
+    var onCaptureCamera: (() -> Void)?
     var onOpenSearch: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onQuit: (() -> Void)?
@@ -171,6 +185,8 @@ class StatusBarPopoverViewController: NSViewController {
     private var windowButton: CyberpunkButton!
     private var scrollButton: CyberpunkButton!
     private var batchButton: CyberpunkButton!
+    private var streamButton: CyberpunkButton!
+    private var cameraButton: CyberpunkButton!
     private var captureModeLabel: NSTextField!
     private var featuresTitleLabel: NSTextField!
     private var localFeature: FeatureCardView!
@@ -230,6 +246,8 @@ class StatusBarPopoverViewController: NSViewController {
         flagMenuView.onCaptureFullScreen = { [weak self] in self?.onCaptureFullScreen?() }
         flagMenuView.onCaptureScroll = { [weak self] in self?.onCaptureScroll?() }
         flagMenuView.onCaptureBatch = { [weak self] in self?.onCaptureBatch?() }
+        flagMenuView.onCaptureStream = { [weak self] in self?.onCaptureStream?() }
+        flagMenuView.onCaptureCamera = { [weak self] in self?.onCaptureCamera?() }
         view.addSubview(flagMenuView)
         
         heroView = AnimatedHeroView(frame: NSRect(x: 22, y: 406, width: 316, height: 130))
@@ -293,6 +311,20 @@ class StatusBarPopoverViewController: NSViewController {
         batchButton.target = self
         batchButton.action = #selector(captureBatchClicked)
         view.addSubview(batchButton)
+        
+        streamButton = CyberpunkButton(frame: NSRect(x: 22, y: 234, width: 100, height: 50))
+        streamButton.title = LocalizedText.value("stream")
+        streamButton.glowColor = HUDPalette.cyan
+        streamButton.target = self
+        streamButton.action = #selector(captureStreamClicked)
+        view.addSubview(streamButton)
+        
+        cameraButton = CyberpunkButton(frame: NSRect(x: 126, y: 234, width: 100, height: 50))
+        cameraButton.title = LocalizedText.value("camera")
+        cameraButton.glowColor = NSColor(calibratedRed: 0.0, green: 0.92, blue: 1.0, alpha: 1.0)
+        cameraButton.target = self
+        cameraButton.action = #selector(captureCameraClicked)
+        view.addSubview(cameraButton)
         
         captureModeLabel = createLabel(text: LocalizedText.value("areaReady"), fontSize: 11, weight: .medium)
         captureModeLabel.alignment = .center
@@ -414,12 +446,20 @@ class StatusBarPopoverViewController: NSViewController {
         case .batch:
             captureModeLabel.stringValue = "Batch Ready"
             captureModeLabel.textColor = HUDPalette.rose
+        case .stream:
+            captureModeLabel.stringValue = "Stream Ready"
+            captureModeLabel.textColor = HUDPalette.cyan
+        case .camera:
+            captureModeLabel.stringValue = "Camera Ready"
+            captureModeLabel.textColor = NSColor(calibratedRed: 0.0, green: 0.92, blue: 1.0, alpha: 1.0)
         }
         flagMenuView.updateSelected(mode: mode)
         areaButton.isSelected = mode == .area
         windowButton.isSelected = mode == .window
         scrollButton.isSelected = mode == .scroll
         batchButton.isSelected = mode == .batch
+        streamButton.isSelected = mode == .stream
+        cameraButton.isSelected = mode == .camera
     }
     
     private func refreshLocalizedUI(animated: Bool = true) {
@@ -505,6 +545,18 @@ class StatusBarPopoverViewController: NSViewController {
         SettingsManager.shared.captureMode = .batch
         UXSoundPlayer.shared.play(.select)
         onCaptureBatch?()
+    }
+
+    @objc private func captureStreamClicked() {
+        SettingsManager.shared.captureMode = .stream
+        UXSoundPlayer.shared.play(.select)
+        onCaptureStream?()
+    }
+
+    @objc private func captureCameraClicked() {
+        SettingsManager.shared.captureMode = .camera
+        UXSoundPlayer.shared.play(.select)
+        onCaptureCamera?()
     }
 
     @objc private func searchClicked() {

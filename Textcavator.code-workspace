@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "../ViewTang"
+		},
+		{
+			"path": "."
 		}
 	],
 	"settings": {}

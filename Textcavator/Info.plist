@@ -26,6 +26,10 @@
     <true/>
     <key>NSScreenCaptureUsageDescription</key>
     <string>Textcavator needs screen recording permission to capture screenshots for text extraction.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Textcavator needs camera access for live OCR text extraction from your camera or Continuity Camera.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Textcavator needs microphone access to capture audio during screen recording sessions.</string>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright 2024. All rights reserved.</string>
     <key>NSPrincipalClass</key>

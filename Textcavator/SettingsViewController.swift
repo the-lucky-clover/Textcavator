@@ -18,6 +18,8 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
     private var shortcutWindowBtn: CyberpunkButton!
     private var shortcutFullScreenBtn: CyberpunkButton!
     private var shortcutScrollBtn: CyberpunkButton!
+    private var shortcutStreamBtn: CyberpunkButton!
+    private var shortcutCameraBtn: CyberpunkButton!
     private var shortcutResetBtn: CyberpunkButton!
     private var shortcutWarningLabel: NSTextField!
     private var showPreviewSwitch: NSSwitch!
@@ -148,8 +150,10 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         shortcutWindowBtn = createShortcutButton(title: "Window Capture", keyCode: 19, y: -224, mode: .window)
         shortcutFullScreenBtn = createShortcutButton(title: "Full Screen Capture", keyCode: 20, y: -254, mode: .fullScreen)
         shortcutScrollBtn = createShortcutButton(title: "Scroll Capture", keyCode: 21, y: -284, mode: .scroll)
+        shortcutStreamBtn = createShortcutButton(title: "Stream Capture", keyCode: 22, y: -314, mode: .stream)
+        shortcutCameraBtn = createShortcutButton(title: "Camera Capture", keyCode: 23, y: -344, mode: .camera)
 
-        shortcutResetBtn = CyberpunkButton(frame: NSRect(x: 24, y: -316, width: 140, height: 26))
+        shortcutResetBtn = CyberpunkButton(frame: NSRect(x: 24, y: -378, width: 140, height: 26))
         shortcutResetBtn.title = "Reset to Defaults"
         shortcutResetBtn.glowColor = HUDPalette.amber
         shortcutResetBtn.target = self
@@ -508,6 +512,8 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         case SettingsManager.CaptureMode.window.rawValue.hashValue: return .window
         case SettingsManager.CaptureMode.fullScreen.rawValue.hashValue: return .fullScreen
         case SettingsManager.CaptureMode.scroll.rawValue.hashValue: return .scroll
+        case SettingsManager.CaptureMode.stream.rawValue.hashValue: return .stream
+        case SettingsManager.CaptureMode.camera.rawValue.hashValue: return .camera
         default: return nil
         }
     }
@@ -567,7 +573,8 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         case .window: return "Window"
         case .fullScreen: return "Full Screen"
         case .scroll: return "Scroll"
-        case .batch: return "Batch"
+        case .stream: return "Stream"
+        case .camera: return "Camera"
         }
     }
 }

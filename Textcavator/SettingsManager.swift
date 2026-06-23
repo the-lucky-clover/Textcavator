@@ -15,6 +15,8 @@ class SettingsManager {
         case window = "window"
         case fullScreen = "fullScreen"
         case scroll = "scroll"
+        case stream = "stream"
+        case camera = "camera"
     }
     
     private enum Keys {
@@ -35,8 +37,10 @@ class SettingsManager {
         static let shortcutArea = "textcavator.shortcutArea"
         static let shortcutWindow = "textcavator.shortcutWindow"
         static let shortcutFullScreen = "textcavator.shortcutFullScreen"
-        static let shortcutScroll = "textcavator.shortcutScroll"
-        static let showCapturePreview = "textcavator.showCapturePreview"
+    static let shortcutScroll = "textcavator.shortcutScroll"
+    static let shortcutStream = "textcavator.shortcutStream"
+    static let shortcutCamera = "textcavator.shortcutCamera"
+    static let showCapturePreview = "textcavator.showCapturePreview"
         static let batchCaptureCount = "textcavator.batchCaptureCount"
         static let batchCaptureInterval = "textcavator.batchCaptureInterval"
         static let enableHybridSearch = "textcavator.enableHybridSearch"
@@ -173,12 +177,24 @@ class SettingsManager {
         set { defaults.set(newValue, forKey: Keys.shortcutScroll) }
     }
 
+    var shortcutStream: Int {
+        get { defaults.integer(forKey: Keys.shortcutStream) }
+        set { defaults.set(newValue, forKey: Keys.shortcutStream) }
+    }
+
+    var shortcutCamera: Int {
+        get { defaults.integer(forKey: Keys.shortcutCamera) }
+        set { defaults.set(newValue, forKey: Keys.shortcutCamera) }
+    }
+
     func shortcutConflicts(for mode: CaptureMode, keyCode: Int) -> CaptureMode? {
         let map: [CaptureMode: Int] = [
             .area: shortcutArea,
             .window: shortcutWindow,
             .fullScreen: shortcutFullScreen,
-            .scroll: shortcutScroll
+            .scroll: shortcutScroll,
+            .stream: shortcutStream,
+            .camera: shortcutCamera
         ]
         for (otherMode, otherKey) in map where otherMode != mode && otherKey == keyCode && keyCode != 0 {
             return otherMode
@@ -192,6 +208,8 @@ class SettingsManager {
         case .window: shortcutWindow = keyCode
         case .fullScreen: shortcutFullScreen = keyCode
         case .scroll: shortcutScroll = keyCode
+        case .stream: shortcutStream = keyCode
+        case .camera: shortcutCamera = keyCode
         }
     }
 
@@ -200,7 +218,9 @@ class SettingsManager {
             .area: shortcutArea,
             .window: shortcutWindow,
             .fullScreen: shortcutFullScreen,
-            .scroll: shortcutScroll
+            .scroll: shortcutScroll,
+            .stream: shortcutStream,
+            .camera: shortcutCamera
         ]
     }
 
@@ -209,6 +229,8 @@ class SettingsManager {
         shortcutWindow = 19
         shortcutFullScreen = 20
         shortcutScroll = 21
+        shortcutStream = 22
+        shortcutCamera = 23
     }
 
     var showCapturePreview: Bool {
@@ -284,6 +306,8 @@ class SettingsManager {
             Keys.shortcutWindow: 19,
             Keys.shortcutFullScreen: 20,
             Keys.shortcutScroll: 21,
+            Keys.shortcutStream: 22,
+            Keys.shortcutCamera: 23,
             Keys.showCapturePreview: false,
             Keys.batchCaptureCount: 5,
             Keys.batchCaptureInterval: 2.0,
@@ -312,6 +336,8 @@ class SettingsManager {
         defaults.removeObject(forKey: Keys.shortcutWindow)
         defaults.removeObject(forKey: Keys.shortcutFullScreen)
         defaults.removeObject(forKey: Keys.shortcutScroll)
+        defaults.removeObject(forKey: Keys.shortcutStream)
+        defaults.removeObject(forKey: Keys.shortcutCamera)
         defaults.removeObject(forKey: Keys.showCapturePreview)
         defaults.removeObject(forKey: Keys.batchCaptureCount)
         defaults.removeObject(forKey: Keys.batchCaptureInterval)

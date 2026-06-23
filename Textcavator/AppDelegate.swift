@@ -1,6 +1,7 @@
 import AppKit
 import Carbon
 import Vision
+import CoreGraphics
 
 enum CaptureMode {
     case area
@@ -8,6 +9,8 @@ enum CaptureMode {
     case fullScreen
     case scroll
     case batch
+    case stream
+    case camera
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -83,6 +86,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         statusBarController.onCaptureBatch = { [weak self] in
             self?.captureScreenshot(mode: .batch)
+        }
+
+        statusBarController.onCaptureStream = { [weak self] in
+            self?.startStreamCapture()
+        }
+
+        statusBarController.onCaptureCamera = { [weak self] in
+            self?.startCameraCapture()
         }
         
         statusBarController.onOpenSearch = { [weak self] in
@@ -163,6 +174,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 case .scroll:
                     DispatchQueue.main.async { [weak self] in
                         self?.captureScreenshot(mode: .scroll)
+                    }
+                case .stream:
+                    DispatchQueue.main.async { [weak self] in
+                        self?.startStreamCapture()
+                    }
+                case .camera:
+                    DispatchQueue.main.async { [weak self] in
+                        self?.startCameraCapture()
                     }
                 }
                 return nil
@@ -280,6 +299,67 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.main.async {
                 self?.processImage(image)
                 self?.isCapturing = false
+            }
+        }
+    }
+    
+    private func startStreamCapture() {
+        guard !isCapturing else {
+            UXSoundPlayer.shared.play(.cancel)
+            return
+        }
+        isCapturing = true
+        guard let display = NSScreen.main else {
+            isCapturing = false
+            return
+        }
+        let displayID = display.displayID
+        Task {
+            do {
+                try await CaptureStreamController.shared.startStream(displayID: displayID)
+            } catch {
+                DispatchQueue.main.async {
+                    self.isCapturing = false
+                    self.progressPopover?.updateProgress(1.0, status: "Stream failed: \(error.localizedDescription)")
+                    self.progressPopover?.complete()
+                }
+            }
+        }
+    }
+
+    private func startCameraCapture() {
+        guard !isCapturing else {
+            UXSoundPlayer.shared.play(.cancel)
+            return
+        }
+        isCapturing = true
+        guard let window = NSApp.mainWindow ?? NSApp.windows.first else {
+            isCapturing = false
+            return
+        }
+        let preview = LiveOCRPreview(frame: window.contentView?.bounds ?? NSRect(x: 0, y: 0, width: 800, height: 600))
+        window.contentView?.addSubview(preview)
+        preview.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            preview.leadingAnchor.constraint(equalTo: window.contentView!.leadingAnchor),
+            preview.trailingAnchor.constraint(equalTo: window.contentView!.trailingAnchor),
+            preview.topAnchor.constraint(equalTo: window.contentView!.topAnchor),
+            preview.bottomAnchor.constraint(equalTo: window.contentView!.bottomAnchor)
+        ])
+        Task {
+            do {
+                let session = try await CameraCaptureController.shared.startCaptureSession(previewView: preview)
+                preview.attachPreviewLayer(AVCaptureVideoPreviewLayer(session: session))
+                preview.startLiveOCR()
+                CameraCaptureController.shared.startLiveOCR { [weak self] text, observations in
+                    preview.onTextDetected?(text, observations)
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.isCapturing = false
+                    self.progressPopover?.updateProgress(1.0, status: "Camera failed: \(error.localizedDescription)")
+                    self.progressPopover?.complete()
+                }
             }
         }
     }

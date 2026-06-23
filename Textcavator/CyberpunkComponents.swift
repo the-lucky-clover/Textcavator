@@ -1,6 +1,13 @@
 import AppKit
 import Quartz
 
+extension NSScreen {
+    var displayID: CGDirectDisplayID {
+        let key = NSDeviceDescriptionKey("NSScreenNumber")
+        return deviceDescription[key] as? CGDirectDisplayID ?? CGMainDisplayID()
+    }
+}
+
 struct UXSoundPlayer {
     static let shared = UXSoundPlayer()
 
@@ -105,8 +112,13 @@ struct LocalizedText {
             "chipShortcuts": "Cmd+Shift 1 / 2",
             "chipEffects": "Glass HUD Effects",
             "chipEsc": "Esc cancels cursor",
-            "areaReady": "⬚ Crosshair capture ready",
-            "windowReady": "⊞ Window capture ready",
+            "areaReady": "Crosshair capture ready",
+            "windowReady": "Window capture ready",
+            "scrollReady": "Scroll Ready",
+            "streamReady": "Stream Ready",
+            "stream": "Stream",
+            "cameraReady": "Camera Ready",
+            "camera": "Camera",
             "settings": "Settings HUD",
             "settingsSubtitle": "Local OCR routing, capture flags, and glass HUD preferences",
             "captureFlags": "CAPTURE FLAGS",
@@ -127,10 +139,10 @@ struct LocalizedText {
             "complete": "Complete!",
             "cancel": "Cancel",
             "welcome": "Welcome to Textcavator",
-            "onboarding": "Textcavator runs OCR locally with Apple Vision.\n\nTo use ⌃⌘⌥1, ⌃⌘⌥2, ⌃⌘⌥3, ⌃⌘⌥4, grant:\n1. Screen Recording permission\n2. Accessibility permission for global hotkeys\n\nOpen System Settings now, or choose Later.",
+            "onboarding": "Textcavator runs OCR locally with Apple Vision.\n\nTo use ⌃⌘⌥1-⌃⌘⌥7, grant:\n1. Screen Recording permission\n2. Accessibility permission for global hotkeys\n3. Camera and Microphone permissions\n\nOpen System Settings now, or choose Later.",
             "openSettings": "Open System Settings",
             "later": "Later",
-            "launchNotification": "Press ⌃⌘⌥1 crosshair, ⌃⌘⌥2 window, ⌃⌘⌥3 fullscreen, ⌃⌘⌥4 scroll",
+            "launchNotification": "Press ⌃⌘⌥1 crosshair, ⌃⌘⌥2 window, ⌃⌘⌥3 fullscreen, ⌃⌘⌥4 scroll, ⌃⌘⌥6 stream, ⌃⌘⌥7 camera",
             "copied": "Text copied to clipboard",
             "saved": "Saved to ",
             "failedSave": "Failed to save file: ",
@@ -1195,6 +1207,13 @@ class CaptureOverlayController {
             view.onCaptureWindow = { [weak self] id, frame in
                 self?.startScrollCapture(windowID: id, frame: frame)
             }
+        } else if mode == .stream {
+            view.onCaptureWindow = { [weak self] _, frame in
+                self?.startStreamCapture(rect: frame)
+            }
+        } else if mode == .camera {
+            cancel(silent: true)
+            startCameraCapture()
         } else {
             view.onCaptureWindow = { [weak self] id, frame in self?.captureWindow(id, frame) }
         }
@@ -1273,6 +1292,70 @@ class CaptureOverlayController {
         UXSoundPlayer.shared.play(.capture)
         onCapture?(capturedImage)
         onCapture = nil
+    }
+
+    private func startStreamCapture(rect: CGRect) {
+        cancel(silent: true)
+        guard let screen = NSScreen.main else { return }
+        let displayID = screen.displayID
+        Task { @MainActor in
+            do {
+                try await CaptureStreamController.shared.startStream(displayID: displayID)
+                var frameCount = 0
+                let maxFrames = 5
+                let semaphore = DispatchSemaphore(value: 0)
+                let originalOnFrame = CaptureStreamController.shared.onFrameCaptured
+                CaptureStreamController.shared.onFrameCaptured = { [weak self] image, _ in
+                    frameCount += 1
+                    if frameCount >= maxFrames {
+                        _ = CaptureStreamController.shared.stopStream()
+                        CaptureStreamController.shared.onFrameCaptured = originalOnFrame
+                        let effectRect = self?.screenRectToBottomLeft(rect) ?? .zero
+                        if SettingsManager.shared.effectsEnabled {
+                            CaptureEffectWindow().show(at: effectRect, mode: .stream)
+                        }
+                        self?.onCapture?(image)
+                        semaphore.signal()
+                    }
+                }
+                semaphore.wait()
+            } catch {
+                onCapture?(nil)
+            }
+        }
+    }
+
+    private func startCameraCapture() {
+        cancel(silent: true)
+        guard let window = NSApp.windows.first(where: { $0 != overlayWindow }) else { return }
+        let preview = LiveOCRPreview(frame: window.contentView?.bounds ?? NSRect(x: 0, y: 0, width: 800, height: 600))
+        window.contentView?.addSubview(preview)
+        preview.translatesAutoresizingMaskIntoConstraints = false
+        if let contentView = window.contentView {
+            NSLayoutConstraint.activate([
+                preview.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                preview.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+                preview.topAnchor.constraint(equalTo: contentView.topAnchor),
+                preview.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            ])
+        }
+        Task { @MainActor in
+            do {
+                let session = try await CameraCaptureController.shared.startCaptureSession(previewView: preview)
+                preview.attachPreviewLayer(AVCaptureVideoPreviewLayer(session: session))
+                preview.startLiveOCR()
+                CameraCaptureController.shared.startLiveOCR { [weak preview] text, observations in
+                    preview?.onTextDetected?(text, observations)
+                }
+                if let onCapture = onCapture {
+                    preview.onCaptureTriggered = {
+                        onCapture(nil)
+                    }
+                }
+            } catch {
+                onCapture?(nil)
+            }
+        }
     }
 
     private func captureAreaImage(_ rect: CGRect, from window: NSWindow) -> NSImage? {
@@ -1888,6 +1971,8 @@ class FlagMenuView: NSView {
     var onCaptureFullScreen: (() -> Void)?
     var onCaptureScroll: (() -> Void)?
     var onCaptureBatch: (() -> Void)?
+    var onCaptureStream: (() -> Void)?
+    var onCaptureCamera: (() -> Void)?
     var buttonTitle: String = "⚑ Flag Menu" {
         didSet { button.title = buttonTitle }
     }
@@ -1933,6 +2018,12 @@ class FlagMenuView: NSView {
         let batchItem = NSMenuItem(title: "Batch Capture ⌃⌘⌥5", action: #selector(batchSelected), keyEquivalent: "")
         batchItem.tag = 5
         captureMenu.addItem(batchItem)
+        let streamItem = NSMenuItem(title: "Stream Capture ⌃⌘⌥6", action: #selector(streamSelected), keyEquivalent: "")
+        streamItem.tag = 6
+        captureMenu.addItem(streamItem)
+        let cameraItem = NSMenuItem(title: "Camera Capture ⌃⌘⌥7", action: #selector(cameraSelected), keyEquivalent: "")
+        cameraItem.tag = 7
+        captureMenu.addItem(cameraItem)
         captureMenu.delegate = self
     }
 
@@ -1954,6 +2045,10 @@ class FlagMenuView: NSView {
             button.glowColor = NSColor(calibratedRed: 0.0, green: 0.92, blue: 1.0, alpha: 1.0)
         case .batch:
             button.glowColor = HUDPalette.rose
+        case .stream:
+            button.glowColor = HUDPalette.cyan
+        case .camera:
+            button.glowColor = NSColor(calibratedRed: 0.0, green: 0.92, blue: 1.0, alpha: 1.0)
         }
     }
 
@@ -1980,6 +2075,14 @@ class FlagMenuView: NSView {
 
     @objc private func batchSelected() {
         onCaptureBatch?()
+    }
+
+    @objc private func streamSelected() {
+        onCaptureStream?()
+    }
+
+    @objc private func cameraSelected() {
+        onCaptureCamera?()
     }
 }
 
