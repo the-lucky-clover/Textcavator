@@ -51,6 +51,22 @@
 		9FBC75719CEC42DA98638DF2 /* ScrollCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollCaptureController.swift; sourceTree = "<group>"; };
 		077D8716FA714588B6E136AF /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0B3C8BC0504FD7BE1F5A1D /* ShortcutRecorder.swift */; };
 		BA0B3C8BC0504FD7BE1F5A1D /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorder.swift; sourceTree = "<group>"; };
+		5936936CFDE649F68F86689A /* OCRPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3B642960D14EC4ADDA4A27 /* OCRPlugin.swift */; };
+		2A3B642960D14EC4ADDA4A27 /* OCRPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRPlugin.swift; sourceTree = "<group>"; };
+		D2128D0BAED842AFAB0B7ABB /* VisionOCRPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724889A23B04A79B39D3089 /* VisionOCRPlugin.swift */; };
+		1724889A23B04A79B39D3089 /* VisionOCRPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionOCRPlugin.swift; sourceTree = "<group>"; };
+		428ADCC1D67D49A0A909DADD /* TesseractOCRPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A9BFDB4AE1F46C0A69ECEC4 /* TesseractOCRPlugin.swift */; };
+		1A9BFDB4AE1F46C0A69ECEC4 /* TesseractOCRPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TesseractOCRPlugin.swift; sourceTree = "<group>"; };
+		AD3149E1E6FB4CB18003DD09 /* OCRPluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD6FFF3978A4A599A1BCA5D /* OCRPluginManager.swift */; };
+		1DD6FFF3978A4A599A1BCA5D /* OCRPluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRPluginManager.swift; sourceTree = "<group>"; };
+		145F3406C6554450956B34D8 /* CapturePreviewWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89F5BFB9B6C483189453E50 /* CapturePreviewWindowController.swift */; };
+		C89F5BFB9B6C483189453E50 /* CapturePreviewWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePreviewWindowController.swift; sourceTree = "<group>"; };
+		5CA4D29F3FF8410D81EEC99F /* RedactionOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C078FC14381E4BEBB3908D58 /* RedactionOverlayView.swift */; };
+		C078FC14381E4BEBB3908D58 /* RedactionOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedactionOverlayView.swift; sourceTree = "<group>"; };
+		3158F39043384168AC342965 /* BatchCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97343725ABC84DE7820974C7 /* BatchCaptureController.swift */; };
+		97343725ABC84DE7820974C7 /* BatchCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchCaptureController.swift; sourceTree = "<group>"; };
+		6B08373861B9477EA81CDEAE /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7C52D69D054B9898190E2C /* ShortcutRecorder.swift */; };
+		EF7C52D69D054B9898190E2C /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -93,6 +109,14 @@
 				555037351CD64370B14C17AA /* OCRReviewWindowController.swift */,
 							311529A9FCC445BAB0B69F73 /* ScrollCaptureController.swift */,
 							CDA8335D001C4D2DBB480F20 /* ShortcutRecorder.swift */,
+							2D14B64A213F4E6D945A7B79 /* OCRPlugin.swift */,
+				DE5EF9E6E4AB4C71B81A1286 /* VisionOCRPlugin.swift */,
+				631C52E52E13489B951E624F /* TesseractOCRPlugin.swift */,
+				402CD0E9FCD74722846E357B /* OCRPluginManager.swift */,
+				A761A872177C4AE18C6065C6 /* CapturePreviewWindowController.swift */,
+				E33771F6C6BB4C82A3271B85 /* RedactionOverlayView.swift */,
+				433FAC4A2C1A4D0181AA3646 /* BatchCaptureController.swift */,
+				075E9EDDEBE64814958F2D7C /* ShortcutRecorder.swift */,
 			);
 			path = Textcavator;
 			sourceTree = "<group>";
@@ -174,6 +198,14 @@
 			7E12AC49787D4733AECE5F81 /* OCRReviewWindowController.swift in Sources */,
 						54E39F67A05741F5A846C1B7 /* ScrollCaptureController.swift in Sources */,
 						4AAD364F9F964DD1AF68E44C /* ShortcutRecorder.swift in Sources */,
+						81F93620FC154836A16D20F7 /* OCRPlugin.swift in Sources */,
+			A5326D08A4A94633B55F327D /* VisionOCRPlugin.swift in Sources */,
+			2D4CB4F152A24D1C9A165414 /* TesseractOCRPlugin.swift in Sources */,
+			39A249873DCC49F599C39A9D /* OCRPluginManager.swift in Sources */,
+			B6779A23EE954A46A39BE81A /* CapturePreviewWindowController.swift in Sources */,
+			9037EF8A5CF34F8A911C9663 /* RedactionOverlayView.swift in Sources */,
+			597C752838E045B69AC52EDC /* BatchCaptureController.swift in Sources */,
+			2E84BF06389C4EA8AD2BD177 /* ShortcutRecorder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

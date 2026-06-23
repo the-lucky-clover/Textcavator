@@ -81,9 +81,17 @@ class StatusBarController {
             self?.closePopover()
             self?.onCaptureWindow?()
         }
+        popoverViewController.onCaptureFullScreen = { [weak self] in
+            self?.closePopover()
+            self?.onCaptureFullScreen?()
+        }
         popoverViewController.onCaptureScroll = { [weak self] in
             self?.closePopover()
             self?.onCaptureScroll?()
+        }
+        popoverViewController.onCaptureBatch = { [weak self] in
+            self?.closePopover()
+            self?.onCaptureBatch?()
         }
         popoverViewController.onOpenSearch = { [weak self] in
             self?.closePopover()
@@ -145,7 +153,9 @@ class StatusBarPopoverViewController: NSViewController {
     
     var onCaptureArea: (() -> Void)?
     var onCaptureWindow: (() -> Void)?
+    var onCaptureFullScreen: (() -> Void)?
     var onCaptureScroll: (() -> Void)?
+    var onCaptureBatch: (() -> Void)?
     var onOpenSearch: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onQuit: (() -> Void)?
@@ -160,6 +170,7 @@ class StatusBarPopoverViewController: NSViewController {
     private var areaButton: CyberpunkButton!
     private var windowButton: CyberpunkButton!
     private var scrollButton: CyberpunkButton!
+    private var batchButton: CyberpunkButton!
     private var captureModeLabel: NSTextField!
     private var featuresTitleLabel: NSTextField!
     private var localFeature: FeatureCardView!
@@ -216,6 +227,9 @@ class StatusBarPopoverViewController: NSViewController {
         flagMenuView = FlagMenuView(frame: NSRect(x: 22, y: 546, width: 316, height: 32))
         flagMenuView.onCaptureArea = { [weak self] in self?.onCaptureArea?() }
         flagMenuView.onCaptureWindow = { [weak self] in self?.onCaptureWindow?() }
+        flagMenuView.onCaptureFullScreen = { [weak self] in self?.onCaptureFullScreen?() }
+        flagMenuView.onCaptureScroll = { [weak self] in self?.onCaptureScroll?() }
+        flagMenuView.onCaptureBatch = { [weak self] in self?.onCaptureBatch?() }
         view.addSubview(flagMenuView)
         
         heroView = AnimatedHeroView(frame: NSRect(x: 22, y: 406, width: 316, height: 130))
@@ -272,6 +286,13 @@ class StatusBarPopoverViewController: NSViewController {
         scrollButton.target = self
         scrollButton.action = #selector(captureScrollClicked)
         view.addSubview(scrollButton)
+        
+        batchButton = CyberpunkButton(frame: NSRect(x: 334, y: 294, width: 100, height: 50))
+        batchButton.title = "Batch"
+        batchButton.glowColor = HUDPalette.rose
+        batchButton.target = self
+        batchButton.action = #selector(captureBatchClicked)
+        view.addSubview(batchButton)
         
         captureModeLabel = createLabel(text: LocalizedText.value("areaReady"), fontSize: 11, weight: .medium)
         captureModeLabel.alignment = .center
@@ -387,11 +408,18 @@ class StatusBarPopoverViewController: NSViewController {
         case .scroll:
             captureModeLabel.stringValue = "Scroll Ready"
             captureModeLabel.textColor = HUDPalette.amber
+        case .fullScreen:
+            captureModeLabel.stringValue = "Full Screen Ready"
+            captureModeLabel.textColor = HUDPalette.cyan
+        case .batch:
+            captureModeLabel.stringValue = "Batch Ready"
+            captureModeLabel.textColor = HUDPalette.rose
         }
         flagMenuView.updateSelected(mode: mode)
         areaButton.isSelected = mode == .area
         windowButton.isSelected = mode == .window
         scrollButton.isSelected = mode == .scroll
+        batchButton.isSelected = mode == .batch
     }
     
     private func refreshLocalizedUI(animated: Bool = true) {
@@ -471,6 +499,12 @@ class StatusBarPopoverViewController: NSViewController {
         SettingsManager.shared.captureMode = .scroll
         UXSoundPlayer.shared.play(.select)
         onCaptureScroll?()
+    }
+
+    @objc private func captureBatchClicked() {
+        SettingsManager.shared.captureMode = .batch
+        UXSoundPlayer.shared.play(.select)
+        onCaptureBatch?()
     }
 
     @objc private func searchClicked() {

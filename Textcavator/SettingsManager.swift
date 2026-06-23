@@ -36,6 +36,9 @@ class SettingsManager {
         static let shortcutWindow = "textcavator.shortcutWindow"
         static let shortcutFullScreen = "textcavator.shortcutFullScreen"
         static let shortcutScroll = "textcavator.shortcutScroll"
+        static let showCapturePreview = "textcavator.showCapturePreview"
+        static let batchCaptureCount = "textcavator.batchCaptureCount"
+        static let batchCaptureInterval = "textcavator.batchCaptureInterval"
     }
     
     var outputMode: OutputMode {
@@ -205,6 +208,26 @@ class SettingsManager {
         shortcutScroll = 21
     }
 
+    var showCapturePreview: Bool {
+        get {
+            if defaults.object(forKey: Keys.showCapturePreview) == nil {
+                return false
+            }
+            return defaults.bool(forKey: Keys.showCapturePreview)
+        }
+        set { defaults.set(newValue, forKey: Keys.showCapturePreview) }
+    }
+
+    var batchCaptureCount: Int {
+        get { defaults.integer(forKey: Keys.batchCaptureCount) }
+        set { defaults.set(newValue, forKey: Keys.batchCaptureCount) }
+    }
+
+    var batchCaptureInterval: TimeInterval {
+        get { defaults.double(forKey: Keys.batchCaptureInterval) }
+        set { defaults.set(newValue, forKey: Keys.batchCaptureInterval) }
+    }
+
     private init() {
         registerDefaults()
     }
@@ -227,7 +250,10 @@ class SettingsManager {
             Keys.shortcutArea: 18,
             Keys.shortcutWindow: 19,
             Keys.shortcutFullScreen: 20,
-            Keys.shortcutScroll: 21
+            Keys.shortcutScroll: 21,
+            Keys.showCapturePreview: false,
+            Keys.batchCaptureCount: 5,
+            Keys.batchCaptureInterval: 2.0
         ])
     }
 
@@ -250,5 +276,8 @@ class SettingsManager {
         defaults.removeObject(forKey: Keys.shortcutWindow)
         defaults.removeObject(forKey: Keys.shortcutFullScreen)
         defaults.removeObject(forKey: Keys.shortcutScroll)
+        defaults.removeObject(forKey: Keys.showCapturePreview)
+        defaults.removeObject(forKey: Keys.batchCaptureCount)
+        defaults.removeObject(forKey: Keys.batchCaptureInterval)
     }
 }

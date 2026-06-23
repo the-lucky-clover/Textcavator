@@ -7,6 +7,7 @@ enum CaptureMode {
     case window
     case fullScreen
     case scroll
+    case batch
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -18,6 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private var isCapturing = false
+    private var batchRemaining: Int = 0
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusBar()
@@ -71,8 +73,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.captureScreenshot(mode: .window)
         }
 
+        statusBarController.onCaptureFullScreen = { [weak self] in
+            self?.captureFullScreen()
+        }
+
         statusBarController.onCaptureScroll = { [weak self] in
             self?.captureScreenshot(mode: .scroll)
+        }
+
+        statusBarController.onCaptureBatch = { [weak self] in
+            self?.captureScreenshot(mode: .batch)
         }
         
         statusBarController.onOpenSearch = { [weak self] in
@@ -187,12 +197,51 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             UXSoundPlayer.shared.play(.cancel)
             return
         }
+
+        if mode == .batch {
+            batchRemaining = max(1, SettingsManager.shared.batchCaptureCount)
+            isCapturing = true
+            startBatchCapture(mode: .area)
+            return
+        }
+
         isCapturing = true
-        
+
         CaptureOverlayController.shared.start(mode: mode) { [weak self] image in
             self?.isCapturing = false
             guard let image else { return }
             self?.processImage(image)
+        }
+    }
+
+    private func startBatchCapture(mode: CaptureMode) {
+        guard batchRemaining > 0 else {
+            isCapturing = false
+            progressPopover?.complete()
+            UXSoundPlayer.shared.play(.complete)
+            return
+        }
+
+        CaptureOverlayController.shared.start(mode: mode) { [weak self] image in
+            guard let self = self else { return }
+            guard let image else {
+                self.batchRemaining = 0
+                self.isCapturing = false
+                self.progressPopover?.complete()
+                return
+            }
+            self.processImage(image)
+            self.batchRemaining -= 1
+            if self.batchRemaining > 0 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + SettingsManager.shared.batchCaptureInterval) {
+                    self.startBatchCapture(mode: mode)
+                }
+            } else {
+                self.isCapturing = false
+                self.progressPopover?.updateProgress(1.0, status: "Batch complete")
+                self.progressPopover?.complete()
+                UXSoundPlayer.shared.play(.complete)
+            }
         }
     }
 
@@ -236,9 +285,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func processImage(_ image: NSImage) {
-        guard showProgressPopover() else { return }
-        progressPopover.updateProgress(0.08, status: "Image buffered locally")
-
         let tempPath = "/tmp/textcavator_last_capture.png"
         if let tiffData = image.tiffRepresentation,
            let bitmap = NSBitmapImageRep(data: tiffData),
@@ -246,6 +292,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             try? pngData.write(to: URL(fileURLWithPath: tempPath), options: .atomic)
         }
 
+        if SettingsManager.shared.showCapturePreview {
+            let preview = CapturePreviewWindowController(image: image)
+            preview.onConfirm = { [weak self] in
+                self?.continueWithOCR(image: image)
+            }
+            preview.onRetake = { [weak self] in
+                self?.progressPopover?.complete()
+            }
+            preview.showAndWait()
+        } else {
+            continueWithOCR(image: image)
+        }
+    }
+
+    private func continueWithOCR(image: NSImage) {
+        guard showProgressPopover() else { return }
+        progressPopover.updateProgress(0.08, status: "Image buffered locally")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self] in
             self?.performOCR(on: image)
         }
@@ -260,58 +323,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func performOCR(on image: NSImage) {
         guard let progressPopover = progressPopover else { return }
-        progressPopover.updateProgress(0.28, status: "Analyzing image locally...")
-        
         guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
             progressPopover.updateProgress(1.0, status: "Failed to process image")
             progressPopover.complete()
             return
         }
-        
-        let request = VNRecognizeTextRequest { [weak self] request, error in
-            DispatchQueue.main.async {
-                guard let self, let progressPopover = self.progressPopover else { return }
-                
-                if let error = error {
-                    progressPopover.updateProgress(1.0, status: "OCR Error: \(error.localizedDescription)")
-                    progressPopover.complete()
-                    return
-                }
-                
-                guard let observations = request.results as? [VNRecognizedTextObservation], !observations.isEmpty else {
-                    progressPopover.updateProgress(1.0, status: "No text found")
-                    progressPopover.complete()
-                    return
-                }
-                
-                let recognizedText = observations.compactMap { observation in
-                    observation.topCandidates(1).first?.string
-                }.joined(separator: "\n")
 
-                let avgConfidence = observations.compactMap { obs in
-                    obs.topCandidates(1).first?.confidence
-                }.reduce(0.0, +) / Double(observations.count)
+        let lang = SettingsManager.shared.languageCode
+        let engine = OCRPluginManager.shared.activeEngine()?.name ?? "Unknown"
 
-                self.handleOutput(text: recognizedText, confidence: avgConfidence, observations: observations, image: image)
-            }
-        }
-        
-        request.recognitionLevel = .accurate
-        request.usesLanguageCorrection = true
-        
-        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        
-        progressPopover.updateProgress(0.52, status: "Extracting text with Vision OCR...")
-        
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        progressPopover.updateProgress(0.32, status: "Extracting text with \(engine)...")
+
+        Task { @MainActor in
             do {
-                try handler.perform([request])
+                let result = try await OCRPluginManager.shared.recognizeText(in: image, language: lang)
+                self.handleOutput(
+                    text: result.text,
+                    confidence: result.confidence,
+                    observations: result.regions.enumerated().compactMap { idx, region in
+                        let obs = VNRecognizedTextObservation()
+                        obs.boundingBox = region.boundingBox
+                        let candidate = VNRecognizedTextCandidateSpecifier()
+                        candidate.string = region.text
+                        candidate.confidence = region.confidence
+                        obs.topCandidates = [candidate]
+                        return obs
+                    },
+                    image: image
+                )
             } catch {
-                DispatchQueue.main.async { [weak self] in
-                    guard let self, let progressPopover = self.progressPopover else { return }
-                    progressPopover.updateProgress(1.0, status: "OCR Error")
-                    progressPopover.complete()
-                }
+                progressPopover.updateProgress(1.0, status: "OCR Error: \(error.localizedDescription)")
+                progressPopover.complete()
+                UXSoundPlayer.shared.play(.cancel)
             }
         }
     }

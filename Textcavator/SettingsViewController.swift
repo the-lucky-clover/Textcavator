@@ -20,6 +20,9 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
     private var shortcutScrollBtn: CyberpunkButton!
     private var shortcutResetBtn: CyberpunkButton!
     private var shortcutWarningLabel: NSTextField!
+    private var showPreviewSwitch: NSSwitch!
+    private var batchCountField: NSTextField!
+    private var batchIntervalField: NSTextField!
     private var confidenceSlider: NSSlider!
     private var confidenceLabel: NSTextField!
     private var crosshairFlagBtn: CyberpunkButton!
@@ -174,7 +177,37 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         confidenceSlider.action = #selector(confidenceChanged)
         view.addSubview(confidenceSlider)
 
-        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: -446, width: 90, height: 28))
+        let captureSectionLabel = createLabel(text: "CAPTURE OPTIONS", fontSize: 11, weight: .medium)
+        captureSectionLabel.textColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
+        captureSectionLabel.frame = NSRect(x: 24, y: -468, width: 432, height: 16)
+        view.addSubview(captureSectionLabel)
+
+        showPreviewSwitch = NSSwitch()
+        showPreviewSwitch.frame = NSRect(x: 416, y: -490, width: 40, height: 18)
+        showPreviewSwitch.target = self
+        showPreviewSwitch.action = #selector(showPreviewToggled)
+        view.addSubview(showPreviewSwitch)
+        let previewLabel = createLabel(text: "Show capture preview before OCR", fontSize: 12, weight: .regular)
+        previewLabel.frame = NSRect(x: 24, y: -488, width: 380, height: 22)
+        view.addSubview(previewLabel)
+
+        let batchLabel = createLabel(text: "Batch capture count:", fontSize: 12, weight: .regular)
+        batchLabel.frame = NSRect(x: 24, y: -518, width: 180, height: 22)
+        view.addSubview(batchLabel)
+        batchCountField = NSTextField(frame: NSRect(x: 220, y: -518, width: 60, height: 22))
+        batchCountField.stringValue = "5"
+        batchCountField.delegate = self
+        view.addSubview(batchCountField)
+
+        let batchIntervalLabel = createLabel(text: "Interval (sec):", fontSize: 12, weight: .regular)
+        batchIntervalLabel.frame = NSRect(x: 24, y: -546, width: 180, height: 22)
+        view.addSubview(batchIntervalLabel)
+        batchIntervalField = NSTextField(frame: NSRect(x: 220, y: -546, width: 60, height: 22))
+        batchIntervalField.stringValue = "2.0"
+        batchIntervalField.delegate = self
+        view.addSubview(batchIntervalField)
+
+        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: -586, width: 90, height: 28))
         closeBtn.title = "Done"
         closeBtn.glowColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
         closeBtn.target = self
@@ -278,6 +311,9 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         showOCRReviewSwitch.state = settings.showOCRReview ? .on : .off
         autoDeleteScreenshotSwitch.state = settings.autoDeleteScreenshot ? .on : .off
         scrollStepsField.stringValue = "\(settings.scrollCaptureSteps)"
+        showPreviewSwitch.state = settings.showCapturePreview ? .on : .off
+        batchCountField.stringValue = "\(settings.batchCaptureCount)"
+        batchIntervalField.stringValue = String(format: "%.1f", settings.batchCaptureInterval)
 
         shortcutAreaBtn.title = keyName(for: settings.shortcutArea)
         shortcutWindowBtn.title = keyName(for: settings.shortcutWindow)
@@ -362,7 +398,19 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
             SettingsManager.shared.scrollCaptureSteps = max(10, min(200, value))
             scrollStepsField.stringValue = "\(SettingsManager.shared.scrollCaptureSteps)"
             scrollStepsLabel.stringValue = "Max scroll steps: \(SettingsManager.shared.scrollCaptureSteps)"
+        } else if let field = obj.object as? NSTextField, field == batchCountField {
+            let value = Int(field.stringValue) ?? 5
+            SettingsManager.shared.batchCaptureCount = max(1, min(50, value))
+            batchCountField.stringValue = "\(SettingsManager.shared.batchCaptureCount)"
+        } else if let field = obj.object as? NSTextField, field == batchIntervalField {
+            let value = Double(field.stringValue) ?? 2.0
+            SettingsManager.shared.batchCaptureInterval = max(0.5, min(60.0, value))
+            batchIntervalField.stringValue = String(format: "%.1f", SettingsManager.shared.batchCaptureInterval)
         }
+    }
+
+    @objc private func showPreviewToggled() {
+        SettingsManager.shared.showCapturePreview = showPreviewSwitch.state == .on
     }
 
     @objc private func confidenceChanged() {

@@ -1885,7 +1885,9 @@ class FeatureCardView: CyberpunkCard {
 class FlagMenuView: NSView {
     var onCaptureArea: (() -> Void)?
     var onCaptureWindow: (() -> Void)?
+    var onCaptureFullScreen: (() -> Void)?
     var onCaptureScroll: (() -> Void)?
+    var onCaptureBatch: (() -> Void)?
     var buttonTitle: String = "⚑ Flag Menu" {
         didSet { button.title = buttonTitle }
     }
@@ -1922,9 +1924,15 @@ class FlagMenuView: NSView {
         let windowItem = NSMenuItem(title: "Window Capture ⌃⌘⌥2", action: #selector(windowSelected), keyEquivalent: "")
         windowItem.tag = 2
         captureMenu.addItem(windowItem)
+        let fullScreenItem = NSMenuItem(title: "Full Screen Capture ⌃⌘⌥3", action: #selector(fullScreenSelected), keyEquivalent: "")
+        fullScreenItem.tag = 3
+        captureMenu.addItem(fullScreenItem)
         let scrollItem = NSMenuItem(title: "Scroll Capture ⌃⌘⌥4", action: #selector(scrollSelected), keyEquivalent: "")
-        scrollItem.tag = 3
+        scrollItem.tag = 4
         captureMenu.addItem(scrollItem)
+        let batchItem = NSMenuItem(title: "Batch Capture ⌃⌘⌥5", action: #selector(batchSelected), keyEquivalent: "")
+        batchItem.tag = 5
+        captureMenu.addItem(batchItem)
         captureMenu.delegate = self
     }
 
@@ -1942,6 +1950,10 @@ class FlagMenuView: NSView {
             button.glowColor = HUDPalette.violet
         case .scroll:
             button.glowColor = HUDPalette.amber
+        case .fullScreen:
+            button.glowColor = NSColor(calibratedRed: 0.0, green: 0.92, blue: 1.0, alpha: 1.0)
+        case .batch:
+            button.glowColor = HUDPalette.rose
         }
     }
 
@@ -1958,8 +1970,16 @@ class FlagMenuView: NSView {
         onCaptureWindow?()
     }
 
+    @objc private func fullScreenSelected() {
+        onCaptureFullScreen?()
+    }
+
     @objc private func scrollSelected() {
         onCaptureScroll?()
+    }
+
+    @objc private func batchSelected() {
+        onCaptureBatch?()
     }
 }
 
