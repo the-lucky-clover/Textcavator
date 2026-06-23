@@ -79,6 +79,12 @@
 		6F5CB8AAD61F4A64896C8CF1 /* CrossReferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossReferenceEngine.swift; sourceTree = "<group>"; };
 		99C0B08C41FA446CA42454E9 /* RedactionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5C6F2212AB4E318F6D36DE /* RedactionWindowController.swift */; };
 		6B5C6F2212AB4E318F6D36DE /* RedactionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedactionWindowController.swift; sourceTree = "<group>"; };
+		58573E67B72140869037477F /* SummarizationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB532A99C2094A42B198125F /* SummarizationPlugin.swift */; };
+		BB532A99C2094A42B198125F /* SummarizationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummarizationPlugin.swift; sourceTree = "<group>"; };
+		8B7D3081224D45FB9D539F30 /* ExtractiveSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E490BBCF6C3421DBEDC789B /* ExtractiveSummarizer.swift */; };
+		3E490BBCF6C3421DBEDC789B /* ExtractiveSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtractiveSummarizer.swift; sourceTree = "<group>"; };
+		B58937B775EE42C6943D81FA /* ContentClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FDD10242A0B4459874AE712 /* ContentClassifier.swift */; };
+		7FDD10242A0B4459874AE712 /* ContentClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentClassifier.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -135,6 +141,9 @@
 				584347CAD3A7408691415DB6 /* KnowledgeGraphManager.swift */,
 				BCDA5D4B2F5242188D0CF231 /* CrossReferenceEngine.swift */,
 							BCAF596F65DC4178950DEB9A /* RedactionWindowController.swift */,
+							19CBE35D12624A1683809FDC /* SummarizationPlugin.swift */,
+				F6C526A649E44C1C815A63BE /* ExtractiveSummarizer.swift */,
+				1F9C7FD69EDA4576A59337BE /* ContentClassifier.swift */,
 			);
 			path = Textcavator;
 			sourceTree = "<group>";
@@ -230,6 +239,9 @@
 			83D4A4C07D6F4DB89F188C33 /* KnowledgeGraphManager.swift in Sources */,
 			6872B3EFF43342748F917027 /* CrossReferenceEngine.swift in Sources */,
 						48A8FD19C902440E833F91BD /* RedactionWindowController.swift in Sources */,
+						03778E2BC8DA40B7B0127CC6 /* SummarizationPlugin.swift in Sources */,
+			7A3D61E1FB214AB7812C3954 /* ExtractiveSummarizer.swift in Sources */,
+			2F82060425DC4D24A39C271F /* ContentClassifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

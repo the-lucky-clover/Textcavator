@@ -454,12 +454,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             app: "Unknown",
                             existingCaptureIds: allIds
                         )
-                        for relation in CrossReferenceEngine.shared.findRelated(to: lastCaptureId, limit: 5) {
-                            // Relations are already stored in the graph manager
-                            // We could persist them here if needed
-                        }
                     }
                 }
+
+                if settings.enableSummarization, text.count > 100 {
+                    do {
+                        let summaryResult = try await ExtractiveSummarizer.shared.summarize(text, maxLength: 200)
+                        TextcavatorDatabase.shared.saveKnowledgeAsset(
+                            captureId: lastCaptureId,
+                            assetType: "summary",
+                            content: summaryResult.summary,
+                            embedding: nil,
+                            modelVersion: summaryResult.modelVersion
+                        )
+                    } catch {
+                        // Summarization failed, skip silently
+                    }
+                }
+
+                let classification = ContentClassifier.shared.classify(text: text)
+                TextcavatorDatabase.shared.saveKnowledgeAsset(
+                    captureId: lastCaptureId,
+                    assetType: "classification",
+                    content: classification.category.rawValue,
+                    embedding: nil,
+                    modelVersion: "keyword-classifier-v1"
+                )
             }
         }
 
