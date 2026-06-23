@@ -14,8 +14,16 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
     private var autoDeleteScreenshotSwitch: NSSwitch!
     private var scrollStepsField: NSTextField!
     private var scrollStepsLabel: NSTextField!
+    private var shortcutAreaBtn: CyberpunkButton!
+    private var shortcutWindowBtn: CyberpunkButton!
+    private var shortcutFullScreenBtn: CyberpunkButton!
+    private var shortcutScrollBtn: CyberpunkButton!
+    private var shortcutResetBtn: CyberpunkButton!
+    private var shortcutWarningLabel: NSTextField!
     private var confidenceSlider: NSSlider!
     private var confidenceLabel: NSTextField!
+    private var crosshairFlagBtn: CyberpunkButton!
+    private var windowFlagBtn: CyberpunkButton!
     
     var onClose: (() -> Void)?
     var onCaptureArea: (() -> Void)?
@@ -125,16 +133,40 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         scrollStepsField.delegate = self
         view.addSubview(scrollStepsField)
 
+        let shortcutSectionLabel = createLabel(text: "KEYBOARD SHORTCUTS", fontSize: 11, weight: .medium)
+        shortcutSectionLabel.textColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
+        shortcutSectionLabel.frame = NSRect(x: 24, y: -172, width: 432, height: 16)
+        view.addSubview(shortcutSectionLabel)
+
+        shortcutAreaBtn = createShortcutButton(title: "Crosshair Capture", keyCode: 18, y: -194, mode: .area)
+        shortcutWindowBtn = createShortcutButton(title: "Window Capture", keyCode: 19, y: -224, mode: .window)
+        shortcutFullScreenBtn = createShortcutButton(title: "Full Screen Capture", keyCode: 20, y: -254, mode: .fullScreen)
+        shortcutScrollBtn = createShortcutButton(title: "Scroll Capture", keyCode: 21, y: -284, mode: .scroll)
+
+        shortcutResetBtn = CyberpunkButton(frame: NSRect(x: 24, y: -316, width: 140, height: 26))
+        shortcutResetBtn.title = "Reset to Defaults"
+        shortcutResetBtn.glowColor = HUDPalette.amber
+        shortcutResetBtn.target = self
+        shortcutResetBtn.action = #selector(resetShortcutsClicked)
+        view.addSubview(shortcutResetBtn)
+
+        shortcutWarningLabel = NSTextField(labelWithString: "")
+        shortcutWarningLabel.font = NSFont.systemFont(ofSize: 11, weight: .regular)
+        shortcutWarningLabel.textColor = NSColor(calibratedRed: 1.0, green: 0.72, blue: 0.22, alpha: 1.0)
+        shortcutWarningLabel.frame = NSRect(x: 180, y: -316, width: 276, height: 26)
+        shortcutWarningLabel.lineBreakMode = .byTruncatingTail
+        view.addSubview(shortcutWarningLabel)
+
         let filterSectionLabel = createLabel(text: "OCR CONFIDENCE FILTER", fontSize: 11, weight: .medium)
         filterSectionLabel.textColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
-        filterSectionLabel.frame = NSRect(x: 24, y: -172, width: 432, height: 16)
+        filterSectionLabel.frame = NSRect(x: 24, y: -356, width: 432, height: 16)
         view.addSubview(filterSectionLabel)
 
         confidenceLabel = createLabel(text: "Minimum Confidence: 50%", fontSize: 12, weight: .regular)
-        confidenceLabel.frame = NSRect(x: 24, y: -194, width: 432, height: 18)
+        confidenceLabel.frame = NSRect(x: 24, y: -378, width: 432, height: 18)
         view.addSubview(confidenceLabel)
 
-        confidenceSlider = NSSlider(frame: NSRect(x: 24, y: -218, width: 432, height: 20))
+        confidenceSlider = NSSlider(frame: NSRect(x: 24, y: -402, width: 432, height: 20))
         confidenceSlider.minValue = 0.0
         confidenceSlider.maxValue = 1.0
         confidenceSlider.doubleValue = 0.5
@@ -142,7 +174,7 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         confidenceSlider.action = #selector(confidenceChanged)
         view.addSubview(confidenceSlider)
 
-        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: -262, width: 90, height: 28))
+        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: -446, width: 90, height: 28))
         closeBtn.title = "Done"
         closeBtn.glowColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
         closeBtn.target = self
@@ -160,6 +192,42 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         switchView.target = self
         switchView.action = action
         view.addSubview(switchView)
+    }
+
+    private func createShortcutButton(title: String, keyCode: Int, y: CGFloat, mode: SettingsManager.CaptureMode) -> CyberpunkButton {
+        let label = createLabel(text: title, fontSize: 12, weight: .regular)
+        label.frame = NSRect(x: 24, y: y, width: 180, height: 22)
+        view.addSubview(label)
+
+        let btn = CyberpunkButton(frame: NSRect(x: 220, y: y, width: 140, height: 22))
+        btn.title = keyName(for: keyCode)
+        btn.glowColor = HUDPalette.cyan
+        btn.tag = mode.rawValue.hashValue
+        btn.target = self
+        btn.action = #selector(shortcutButtonClicked(_:))
+        view.addSubview(btn)
+        return btn
+    }
+
+    private func keyName(for keyCode: Int) -> String {
+        let mods = modifierString(for: SettingsManager.shared.allShortcuts().values.first { $0 == keyCode } != nil ? 0 : 0)
+        let name: String
+        switch keyCode {
+        case 18: name = "1"
+        case 19: name = "2"
+        case 20: name = "3"
+        case 21: name = "4"
+        case 6:  name = "Z"
+        case 7:  name = "X"
+        case 8:  name = "C"
+        case 9:  name = "V"
+        default: name = "\(keyCode)"
+        }
+        return "⌃⌘⌥" + name
+    }
+
+    private func modifierString(for modifiers: UInt) -> String {
+        return "⌃⌘⌥"
     }
     
     private func createLabel(text: String, fontSize: CGFloat, weight: NSFont.Weight) -> NSTextField {
@@ -210,6 +278,19 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         showOCRReviewSwitch.state = settings.showOCRReview ? .on : .off
         autoDeleteScreenshotSwitch.state = settings.autoDeleteScreenshot ? .on : .off
         scrollStepsField.stringValue = "\(settings.scrollCaptureSteps)"
+
+        shortcutAreaBtn.title = keyName(for: settings.shortcutArea)
+        shortcutWindowBtn.title = keyName(for: settings.shortcutWindow)
+        shortcutFullScreenBtn.title = keyName(for: settings.shortcutFullScreen)
+        shortcutScrollBtn.title = keyName(for: settings.shortcutScroll)
+
+        let areaKey = keyName(for: settings.shortcutArea)
+        let windowKey = keyName(for: settings.shortcutWindow)
+        crosshairFlagBtn.title = "Crosshair Capture \(areaKey)"
+        windowFlagBtn.title = "Window Capture \(windowKey)"
+
+        shortcutWarningLabel.stringValue = ""
+
         confidenceSlider.doubleValue = settings.minConfidence
         confidenceLabel.stringValue = String(format: "Minimum Confidence: %.0f%%", settings.minConfidence * 100)
 
@@ -312,5 +393,82 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
     
     @objc private func closeClicked() {
         onClose?()
+    }
+
+    private var activeRecorder: ShortcutRecorderWindowController?
+    private var remappingMode: SettingsManager.CaptureMode?
+
+    @objc private func shortcutButtonClicked(_ sender: CyberpunkButton) {
+        guard let mode = modeFromTag(sender.tag) else { return }
+        remappingMode = mode
+        showShortcutRecorder(for: mode, button: sender)
+    }
+
+    private func modeFromTag(_ tag: Int) -> SettingsManager.CaptureMode? {
+        switch tag {
+        case SettingsManager.CaptureMode.area.rawValue.hashValue: return .area
+        case SettingsManager.CaptureMode.window.rawValue.hashValue: return .window
+        case SettingsManager.CaptureMode.fullScreen.rawValue.hashValue: return .fullScreen
+        case SettingsManager.CaptureMode.scroll.rawValue.hashValue: return .scroll
+        default: return nil
+        }
+    }
+
+    private func showShortcutRecorder(for mode: SettingsManager.CaptureMode, button: CyberpunkButton) {
+        let recorder = ShortcutRecorderWindowController()
+        activeRecorder = recorder
+
+        recorder.onShortcutRecorded = { [weak self] keyCode, modifiers in
+            guard let self = self, let mode = self.remappingMode else { return }
+            let settings = SettingsManager.shared
+
+            if let conflict = settings.shortcutConflicts(for: mode, keyCode: keyCode) {
+                self.shortcutWarningLabel.stringValue = "Conflict with \(modeName(conflict))! Reassigning..."
+                settings.setShortcut(keyCode, for: mode)
+                settings.setShortcut(0, for: conflict)
+                UXSoundPlayer.shared.play(.complete)
+            } else {
+                settings.setShortcut(keyCode, for: mode)
+                self.shortcutWarningLabel.stringValue = ""
+                UXSoundPlayer.shared.play(.complete)
+            }
+
+            self.updateShortcutButtons()
+            self.remappingMode = nil
+            self.activeRecorder = nil
+        }
+
+        recorder.onCancelled = { [weak self] in
+            self?.remappingMode = nil
+            self?.activeRecorder = nil
+            self?.shortcutWarningLabel.stringValue = ""
+        }
+
+        recorder.showCentered()
+        UXSoundPlayer.shared.play(.arm)
+    }
+
+    @objc private func resetShortcutsClicked() {
+        SettingsManager.shared.resetShortcutsToDefaults()
+        updateShortcutButtons()
+        shortcutWarningLabel.stringValue = ""
+        UXSoundPlayer.shared.play(.complete)
+    }
+
+    private func updateShortcutButtons() {
+        let settings = SettingsManager.shared
+        shortcutAreaBtn.title = keyName(for: settings.shortcutArea)
+        shortcutWindowBtn.title = keyName(for: settings.shortcutWindow)
+        shortcutFullScreenBtn.title = keyName(for: settings.shortcutFullScreen)
+        shortcutScrollBtn.title = keyName(for: settings.shortcutScroll)
+    }
+
+    private func modeName(_ mode: SettingsManager.CaptureMode) -> String {
+        switch mode {
+        case .area: return "Crosshair"
+        case .window: return "Window"
+        case .fullScreen: return "Full Screen"
+        case .scroll: return "Scroll"
+        }
     }
 }

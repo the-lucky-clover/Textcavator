@@ -9,7 +9,7 @@ class SettingsWindowController: NSWindowController {
         let settingsViewController = SettingsViewController()
         
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 430),
+            contentRect: NSRect(x: 0, y: 0, width: 480, height: 520),
             styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered,
             defer: false

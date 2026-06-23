@@ -5,6 +5,7 @@ import Vision
 enum CaptureMode {
     case area
     case window
+    case fullScreen
     case scroll
 }
 
@@ -134,23 +135,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let hasOption = flags.contains(.maskAlternate)
 
         if hasCommand && hasControl && hasOption {
-            if keyCode == 18 {
-                DispatchQueue.main.async { [weak self] in
-                    self?.captureScreenshot(mode: .area)
-                }
-                return nil
-            } else if keyCode == 19 {
-                DispatchQueue.main.async { [weak self] in
-                    self?.captureScreenshot(mode: .window)
-                }
-                return nil
-            } else if keyCode == 20 {
-                DispatchQueue.main.async { [weak self] in
-                    self?.captureScreenshot(mode: .scroll)
+            let shortcuts = SettingsManager.shared.allShortcuts()
+            for (mode, shortcutKey) in shortcuts where shortcutKey == keyCode && shortcutKey != 0 {
+                switch mode {
+                case .area:
+                    DispatchQueue.main.async { [weak self] in
+                        self?.captureScreenshot(mode: .area)
+                    }
+                case .window:
+                    DispatchQueue.main.async { [weak self] in
+                        self?.captureScreenshot(mode: .window)
+                    }
+                case .fullScreen:
+                    DispatchQueue.main.async { [weak self] in
+                        self?.captureFullScreen()
+                    }
+                case .scroll:
+                    DispatchQueue.main.async { [weak self] in
+                        self?.captureScreenshot(mode: .scroll)
+                    }
                 }
                 return nil
             }
-        }
         }
         
         return Unmanaged.passRetained(event)
@@ -187,6 +193,45 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.isCapturing = false
             guard let image else { return }
             self?.processImage(image)
+        }
+    }
+
+    private func captureFullScreen() {
+        guard !isCapturing else {
+            UXSoundPlayer.shared.play(.cancel)
+            return
+        }
+        isCapturing = true
+        guard showProgressPopover() else {
+            isCapturing = false
+            return
+        }
+        progressPopover.updateProgress(0.08, status: "Capturing all screens...")
+
+        let screens = NSScreen.screens
+        guard let first = screens.first else {
+            isCapturing = false
+            progressPopover.updateProgress(1.0, status: "No screens found")
+            progressPopover.complete()
+            return
+        }
+        var combinedRect = first.frame
+        screens.dropFirst().forEach { combinedRect = combinedRect.union($0.frame) }
+
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let cgImage = CGWindowListCreateImage(combinedRect, [.optionOnScreenOnly], kCGNullWindowID, [.bestResolution]) else {
+                DispatchQueue.main.async {
+                    self?.isCapturing = false
+                    self?.progressPopover?.updateProgress(1.0, status: "Capture failed")
+                    self?.progressPopover?.complete()
+                }
+                return
+            }
+            let image = NSImage(cgImage: cgImage, size: NSSize(width: cgImage.width, height: cgImage.height))
+            DispatchQueue.main.async {
+                self?.processImage(image)
+                self?.isCapturing = false
+            }
         }
     }
     

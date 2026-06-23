@@ -49,6 +49,8 @@
 		279519CBF1E9432F904E41AC /* OCRReviewWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRReviewWindowController.swift; sourceTree = "<group>"; };
 		6D4357D4376C4C5ABA8FD4B9 /* ScrollCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBC75719CEC42DA98638DF2 /* ScrollCaptureController.swift */; };
 		9FBC75719CEC42DA98638DF2 /* ScrollCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollCaptureController.swift; sourceTree = "<group>"; };
+		077D8716FA714588B6E136AF /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0B3C8BC0504FD7BE1F5A1D /* ShortcutRecorder.swift */; };
+		BA0B3C8BC0504FD7BE1F5A1D /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -90,6 +92,7 @@
 							97C311463E1447B2B7D815D2 /* OCRReviewView.swift */,
 				555037351CD64370B14C17AA /* OCRReviewWindowController.swift */,
 							311529A9FCC445BAB0B69F73 /* ScrollCaptureController.swift */,
+							CDA8335D001C4D2DBB480F20 /* ShortcutRecorder.swift */,
 			);
 			path = Textcavator;
 			sourceTree = "<group>";
@@ -170,6 +173,7 @@
 						8517E52CA2CE4ABBAB566BD2 /* OCRReviewView.swift in Sources */,
 			7E12AC49787D4733AECE5F81 /* OCRReviewWindowController.swift in Sources */,
 						54E39F67A05741F5A846C1B7 /* ScrollCaptureController.swift in Sources */,
+						4AAD364F9F964DD1AF68E44C /* ShortcutRecorder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

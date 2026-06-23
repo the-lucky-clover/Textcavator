@@ -5,13 +5,24 @@ class SettingsManager {
     
     private let defaults = UserDefaults.standard
     
-    // Keys
+    enum OutputMode: String {
+        case clipboard = "clipboard"
+        case textFile = "textFile"
+    }
+    
+    enum CaptureMode: String {
+        case area = "area"
+        case window = "window"
+        case fullScreen = "fullScreen"
+        case scroll = "scroll"
+    }
+    
     private enum Keys {
         static let outputMode = "textcavator.outputMode"
         static let outputFolder = "textcavator.outputFolder"
         static let launchAtLogin = "textcavator.launchAtLogin"
         static let showNotifications = "textcavator.showNotifications"
-        static let captureMode = "textcavator.captureMode" // "area" or "window"
+        static let captureMode = "textcavator.captureMode"
         static let soundEnabled = "textcavator.soundEnabled"
         static let effectsEnabled = "textcavator.effectsEnabled"
         static let languageCode = "textcavator.languageCode"
@@ -21,19 +32,11 @@ class SettingsManager {
         static let showOCRReview = "textcavator.showOCRReview"
         static let autoDeleteScreenshot = "textcavator.autoDeleteScreenshot"
         static let scrollCaptureSteps = "textcavator.scrollCaptureSteps"
+        static let shortcutArea = "textcavator.shortcutArea"
+        static let shortcutWindow = "textcavator.shortcutWindow"
+        static let shortcutFullScreen = "textcavator.shortcutFullScreen"
+        static let shortcutScroll = "textcavator.shortcutScroll"
     }
-    
-    enum OutputMode: String {
-        case clipboard = "clipboard"
-        case textFile = "textFile"
-    }
-    
-    enum CaptureMode: String {
-        case area = "area"
-        case window = "window"
-    }
-    
-    // MARK: - Properties
     
     var outputMode: OutputMode {
         get {
@@ -47,13 +50,10 @@ class SettingsManager {
     
     var outputFolder: URL? {
         get {
-            if let path = defaults.string(forKey: Keys.outputFolder) {
-                return URL(fileURLWithPath: path)
-            }
-            return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            defaults.string(forKey: Keys.outputFolder).flatMap { URL(string: $0) }
         }
         set {
-            defaults.set(newValue?.path ?? "", forKey: Keys.outputFolder)
+            defaults.set(newValue?.absoluteString, forKey: Keys.outputFolder)
         }
     }
     
@@ -63,12 +63,7 @@ class SettingsManager {
     }
     
     var showNotifications: Bool {
-        get {
-            if defaults.object(forKey: Keys.showNotifications) == nil {
-                return true
-            }
-            return defaults.bool(forKey: Keys.showNotifications)
-        }
+        get { defaults.bool(forKey: Keys.showNotifications) }
         set { defaults.set(newValue, forKey: Keys.showNotifications) }
     }
     
@@ -83,12 +78,7 @@ class SettingsManager {
     }
     
     var soundEnabled: Bool {
-        get {
-            if defaults.object(forKey: Keys.soundEnabled) == nil {
-                return true
-            }
-            return defaults.bool(forKey: Keys.soundEnabled)
-        }
+        get { defaults.bool(forKey: Keys.soundEnabled) }
         set { defaults.set(newValue, forKey: Keys.soundEnabled) }
     }
     
@@ -157,6 +147,64 @@ class SettingsManager {
         set { defaults.set(newValue, forKey: Keys.scrollCaptureSteps) }
     }
 
+    var shortcutArea: Int {
+        get { defaults.integer(forKey: Keys.shortcutArea) }
+        set { defaults.set(newValue, forKey: Keys.shortcutArea) }
+    }
+
+    var shortcutWindow: Int {
+        get { defaults.integer(forKey: Keys.shortcutWindow) }
+        set { defaults.set(newValue, forKey: Keys.shortcutWindow) }
+    }
+
+    var shortcutFullScreen: Int {
+        get { defaults.integer(forKey: Keys.shortcutFullScreen) }
+        set { defaults.set(newValue, forKey: Keys.shortcutFullScreen) }
+    }
+
+    var shortcutScroll: Int {
+        get { defaults.integer(forKey: Keys.shortcutScroll) }
+        set { defaults.set(newValue, forKey: Keys.shortcutScroll) }
+    }
+
+    func shortcutConflicts(for mode: CaptureMode, keyCode: Int) -> CaptureMode? {
+        let map: [CaptureMode: Int] = [
+            .area: shortcutArea,
+            .window: shortcutWindow,
+            .fullScreen: shortcutFullScreen,
+            .scroll: shortcutScroll
+        ]
+        for (otherMode, otherKey) in map where otherMode != mode && otherKey == keyCode && keyCode != 0 {
+            return otherMode
+        }
+        return nil
+    }
+
+    func setShortcut(_ keyCode: Int, for mode: CaptureMode) {
+        switch mode {
+        case .area: shortcutArea = keyCode
+        case .window: shortcutWindow = keyCode
+        case .fullScreen: shortcutFullScreen = keyCode
+        case .scroll: shortcutScroll = keyCode
+        }
+    }
+
+    func allShortcuts() -> [CaptureMode: Int] {
+        return [
+            .area: shortcutArea,
+            .window: shortcutWindow,
+            .fullScreen: shortcutFullScreen,
+            .scroll: shortcutScroll
+        ]
+    }
+
+    func resetShortcutsToDefaults() {
+        shortcutArea = 18
+        shortcutWindow = 19
+        shortcutFullScreen = 20
+        shortcutScroll = 21
+    }
+
     private init() {
         registerDefaults()
     }
@@ -175,7 +223,11 @@ class SettingsManager {
             Keys.darkPalette: true,
             Keys.showOCRReview: false,
             Keys.autoDeleteScreenshot: true,
-            Keys.scrollCaptureSteps: 50
+            Keys.scrollCaptureSteps: 50,
+            Keys.shortcutArea: 18,
+            Keys.shortcutWindow: 19,
+            Keys.shortcutFullScreen: 20,
+            Keys.shortcutScroll: 21
         ])
     }
 
@@ -194,46 +246,9 @@ class SettingsManager {
         defaults.removeObject(forKey: Keys.showOCRReview)
         defaults.removeObject(forKey: Keys.autoDeleteScreenshot)
         defaults.removeObject(forKey: Keys.scrollCaptureSteps)
-    }
-            return defaults.bool(forKey: Keys.autoDeleteScreenshot)
-        }
-        set { defaults.set(newValue, forKey: Keys.autoDeleteScreenshot) }
-    }
-
-    private init() {
-        registerDefaults()
-    }
-    
-    private func registerDefaults() {
-        defaults.register(defaults: [
-            Keys.outputMode: OutputMode.clipboard.rawValue,
-            Keys.launchAtLogin: false,
-            Keys.showNotifications: true,
-            Keys.captureMode: CaptureMode.area.rawValue,
-            Keys.soundEnabled: true,
-            Keys.effectsEnabled: true,
-            Keys.languageCode: "en-US",
-            Keys.minConfidence: 0.5,
-            Keys.autoSaveToDatabase: true,
-            Keys.darkPalette: true,
-            Keys.showOCRReview: false,
-            Keys.autoDeleteScreenshot: true
-        ])
-    }
-
-    func resetToDefaults() {
-        defaults.removeObject(forKey: Keys.outputMode)
-        defaults.removeObject(forKey: Keys.outputFolder)
-        defaults.removeObject(forKey: Keys.launchAtLogin)
-        defaults.removeObject(forKey: Keys.showNotifications)
-        defaults.removeObject(forKey: Keys.captureMode)
-        defaults.removeObject(forKey: Keys.soundEnabled)
-        defaults.removeObject(forKey: Keys.effectsEnabled)
-        defaults.removeObject(forKey: Keys.languageCode)
-        defaults.removeObject(forKey: Keys.minConfidence)
-        defaults.removeObject(forKey: Keys.autoSaveToDatabase)
-        defaults.removeObject(forKey: Keys.darkPalette)
-        defaults.removeObject(forKey: Keys.showOCRReview)
-        defaults.removeObject(forKey: Keys.autoDeleteScreenshot)
+        defaults.removeObject(forKey: Keys.shortcutArea)
+        defaults.removeObject(forKey: Keys.shortcutWindow)
+        defaults.removeObject(forKey: Keys.shortcutFullScreen)
+        defaults.removeObject(forKey: Keys.shortcutScroll)
     }
 }
