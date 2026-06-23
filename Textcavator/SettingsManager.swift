@@ -39,6 +39,9 @@ class SettingsManager {
         static let showCapturePreview = "textcavator.showCapturePreview"
         static let batchCaptureCount = "textcavator.batchCaptureCount"
         static let batchCaptureInterval = "textcavator.batchCaptureInterval"
+        static let enableHybridSearch = "textcavator.enableHybridSearch"
+        static let enableSummarization = "textcavator.enableSummarization"
+        static let enableCrossReference = "textcavator.enableCrossReference"
     }
     
     var outputMode: OutputMode {
@@ -228,6 +231,36 @@ class SettingsManager {
         set { defaults.set(newValue, forKey: Keys.batchCaptureInterval) }
     }
 
+    var enableHybridSearch: Bool {
+        get {
+            if defaults.object(forKey: Keys.enableHybridSearch) == nil {
+                return false
+            }
+            return defaults.bool(forKey: Keys.enableHybridSearch)
+        }
+        set { defaults.set(newValue, forKey: Keys.enableHybridSearch) }
+    }
+
+    var enableSummarization: Bool {
+        get {
+            if defaults.object(forKey: Keys.enableSummarization) == nil {
+                return false
+            }
+            return defaults.bool(forKey: Keys.enableSummarization)
+        }
+        set { defaults.set(newValue, forKey: Keys.enableSummarization) }
+    }
+
+    var enableCrossReference: Bool {
+        get {
+            if defaults.object(forKey: Keys.enableCrossReference) == nil {
+                return false
+            }
+            return defaults.bool(forKey: Keys.enableCrossReference)
+        }
+        set { defaults.set(newValue, forKey: Keys.enableCrossReference) }
+    }
+
     private init() {
         registerDefaults()
     }
@@ -253,7 +286,10 @@ class SettingsManager {
             Keys.shortcutScroll: 21,
             Keys.showCapturePreview: false,
             Keys.batchCaptureCount: 5,
-            Keys.batchCaptureInterval: 2.0
+            Keys.batchCaptureInterval: 2.0,
+            Keys.enableHybridSearch: false,
+            Keys.enableSummarization: false,
+            Keys.enableCrossReference: false
         ])
     }
 
@@ -279,5 +315,8 @@ class SettingsManager {
         defaults.removeObject(forKey: Keys.showCapturePreview)
         defaults.removeObject(forKey: Keys.batchCaptureCount)
         defaults.removeObject(forKey: Keys.batchCaptureInterval)
+        defaults.removeObject(forKey: Keys.enableHybridSearch)
+        defaults.removeObject(forKey: Keys.enableSummarization)
+        defaults.removeObject(forKey: Keys.enableCrossReference)
     }
 }

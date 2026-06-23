@@ -432,6 +432,37 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func finalizeOutput(text: String, confidence: Double) {
         let settings = SettingsManager.shared
         saveToDatabase(text: text, confidence: confidence)
+
+        Task { @MainActor in
+            if let lastCaptureId = TextcavatorDatabase.shared.recentCaptures(limit: 1).first?.id {
+                if settings.enableHybridSearch || settings.enableCrossReference {
+                    let embeddings = try? await EmbeddingManager.shared.embed(text)
+                    if settings.enableHybridSearch, let embedding = embeddings {
+                        TextcavatorDatabase.shared.saveKnowledgeAsset(
+                            captureId: lastCaptureId,
+                            assetType: "embedding",
+                            content: nil,
+                            embedding: embedding,
+                            modelVersion: EmbeddingManager.shared.activePlugin()?.name ?? "unknown"
+                        )
+                    }
+                    if settings.enableCrossReference {
+                        let allIds = TextcavatorDatabase.shared.recentCaptures(limit: 1000).map(\.id)
+                        await CrossReferenceEngine.shared.analyzeCapture(
+                            lastCaptureId,
+                            text: text,
+                            app: "Unknown",
+                            existingCaptureIds: allIds
+                        )
+                        for relation in CrossReferenceEngine.shared.findRelated(to: lastCaptureId, limit: 5) {
+                            // Relations are already stored in the graph manager
+                            // We could persist them here if needed
+                        }
+                    }
+                }
+            }
+        }
+
         switch settings.outputMode {
         case .clipboard:
             copyToClipboard(text: text)

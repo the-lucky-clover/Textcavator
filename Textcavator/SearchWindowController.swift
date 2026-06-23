@@ -108,16 +108,61 @@ class SearchWindowController: NSWindowController {
 
     private func performSearch(query: String) {
         clearResults()
-        let results = TextcavatorDatabase.shared.search(query: query, limit: 100)
-        for (record, snippet) in results {
-            let vc = SearchResultViewController(record: record, snippet: snippet)
-            vc.onSelect = { [weak self] in
-                self?.openCapture(record)
+        let settings = SettingsManager.shared
+
+        if settings.enableHybridSearch {
+            Task { @MainActor in
+                do {
+                    let queryVector = try await EmbeddingManager.shared.embed(query)
+                    var textResults = TextcavatorDatabase.shared.search(query: query, limit: 100)
+                    let allRecords = TextcavatorDatabase.shared.recentCaptures(limit: 1000)
+
+                    var hybridResults: [(record: CaptureRecord, score: Double, snippet: String)] = []
+
+                    for (record, snippet) in textResults {
+                        let bm25Score = 1.0 / Double(textResults.count) // Normalize
+                        hybridResults.append((record, bm25Score * 0.5, snippet))
+                    }
+
+                    for record in allRecords {
+                        guard let ocrText = record.ocrText, !ocrText.isEmpty else { continue }
+                        let textVector = try await EmbeddingManager.shared.embed(ocrText)
+                        let similarity = EmbeddingManager.shared.cosineSimilarity(queryVector, textVector)
+                        if similarity > 0.3 {
+                            if let existing = hybridResults.first(where: { $0.record.id == record.id }) {
+                                hybridResults[hybridResults.firstIndex(where: { $0.record.id == record.id })!].score += similarity * 0.5
+                            } else {
+                                hybridResults.append((record, similarity * 0.5, record.ocrText ?? ""))
+                            }
+                        }
+                    }
+
+                    hybridResults.sort { $0.score > $1.score }
+                    for (record, _, snippet) in hybridResults.prefix(100) {
+                        let vc = SearchResultViewController(record: record, snippet: snippet)
+                        vc.onSelect = { [weak self] in
+                            self?.openCapture(record)
+                        }
+                        stackView.addArrangedSubview(vc.view)
+                        resultControllers.append(vc)
+                    }
+                    updateEmptyState(count: hybridResults.count)
+                } catch {
+                    updateEmptyState(count: 0)
+                }
             }
-            stackView.addArrangedSubview(vc.view)
-            resultControllers.append(vc)
+        } else {
+            let results = TextcavatorDatabase.shared.search(query: query, limit: 100)
+            for (record, snippet) in results {
+                let vc = SearchResultViewController(record: record, snippet: snippet)
+                vc.onSelect = { [weak self] in
+                    self?.openCapture(record)
+                }
+                stackView.addArrangedSubview(vc.view)
+                resultControllers.append(vc)
+            }
+            updateEmptyState(count: results.count)
         }
-        updateEmptyState(count: results.count)
     }
 
     private func clearResults() {

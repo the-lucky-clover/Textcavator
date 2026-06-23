@@ -66,10 +66,42 @@ class TextcavatorDatabase {
         let createIndex = "CREATE INDEX IF NOT EXISTS idx_captures_app ON captures(source_app);"
         let createIndex2 = "CREATE INDEX IF NOT EXISTS idx_captures_date ON captures(captured_at DESC);"
 
+        let createKnowledgeAssets = """
+        CREATE TABLE IF NOT EXISTS knowledge_assets (
+            id TEXT PRIMARY KEY,
+            capture_id TEXT NOT NULL,
+            asset_type TEXT NOT NULL,
+            content TEXT,
+            embedding_blob BLOB,
+            model_version TEXT,
+            created_at REAL NOT NULL
+        );
+        """
+
+        let createKnowledgeRelations = """
+        CREATE TABLE IF NOT EXISTS knowledge_relations (
+            id TEXT PRIMARY KEY,
+            source_id TEXT NOT NULL,
+            target_id TEXT NOT NULL,
+            relation_type TEXT NOT NULL,
+            weight REAL NOT NULL DEFAULT 1.0,
+            created_at REAL NOT NULL
+        );
+        """
+
+        let createKnowledgeIndex = "CREATE INDEX IF NOT EXISTS idx_knowledge_assets_capture ON knowledge_assets(capture_id);"
+        let createRelationsIndex = "CREATE INDEX IF NOT EXISTS idx_knowledge_relations_source ON knowledge_relations(source_id);"
+        let createRelationsIndex2 = "CREATE INDEX IF NOT EXISTS idx_knowledge_relations_target ON knowledge_relations(target_id);"
+
         execute(createCaptures)
         execute(createFTS)
+        execute(createKnowledgeAssets)
+        execute(createKnowledgeRelations)
         execute(createIndex)
         execute(createIndex2)
+        execute(createKnowledgeIndex)
+        execute(createRelationsIndex)
+        execute(createRelationsIndex2)
     }
 
     private func execute(_ sql: String) {
@@ -211,5 +243,80 @@ class TextcavatorDatabase {
         }
         sqlite3_finalize(stmt)
         return count
+    }
+
+    func saveKnowledgeAsset(captureId: UUID, assetType: String, content: String?, embedding: [Float]?, modelVersion: String) {
+        guard let db = db else { return }
+        let id = UUID().uuidString
+        let embeddingBlob = embedding?.withUnsafeBufferPointer { Data(buffer: $0) }
+        let sql = """
+        INSERT OR REPLACE INTO knowledge_assets (id, capture_id, asset_type, content, embedding_blob, model_version, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+        """
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, id, -1, nil)
+            sqlite3_bind_text(stmt, 2, captureId.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 3, assetType, -1, nil)
+            if let content = content {
+                sqlite3_bind_text(stmt, 4, content, -1, nil)
+            } else {
+                sqlite3_bind_null(stmt, 4)
+            }
+            if let blob = embeddingBlob {
+                blob.withUnsafeBytes { rawPtr in
+                    sqlite3_bind_blob(stmt, 5, rawPtr.baseAddress, Int32(blob.count), nil)
+                }
+            } else {
+                sqlite3_bind_null(stmt, 5)
+            }
+            sqlite3_bind_text(stmt, 6, modelVersion, -1, nil)
+            sqlite3_bind_double(stmt, 7, Date().timeIntervalSince1970)
+            sqlite3_step(stmt)
+        }
+        sqlite3_finalize(stmt)
+    }
+
+    func saveKnowledgeRelation(_ relation: KnowledgeRelation) {
+        guard let db = db else { return }
+        let sql = """
+        INSERT OR REPLACE INTO knowledge_relations (id, source_id, target_id, relation_type, weight, created_at)
+        VALUES (?, ?, ?, ?, ?, ?);
+        """
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, relation.id.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 2, relation.sourceId.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 3, relation.targetId.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 4, relation.relationType.rawValue, -1, nil)
+            sqlite3_bind_double(stmt, 5, relation.weight)
+            sqlite3_bind_double(stmt, 6, relation.createdAt.timeIntervalSince1970)
+            sqlite3_step(stmt)
+        }
+        sqlite3_finalize(stmt)
+    }
+
+    func relations(for captureId: UUID) -> [KnowledgeRelation] {
+        var results: [KnowledgeRelation] = []
+        guard let db = db else { return results }
+        let sql = "SELECT id, source_id, target_id, relation_type, weight, created_at FROM knowledge_relations WHERE source_id = ? OR target_id = ?;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, captureId.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 2, captureId.uuidString, -1, nil)
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                let idStr = String(cString: sqlite3_column_text(stmt, 0))
+                let sourceStr = String(cString: sqlite3_column_text(stmt, 1))
+                let targetStr = String(cString: sqlite3_column_text(stmt, 2))
+                let typeStr = String(cString: sqlite3_column_text(stmt, 3))
+                let weight = sqlite3_column_double(stmt, 4)
+                let created = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 5))
+                if let id = UUID(uuidString: idStr), let source = UUID(uuidString: sourceStr), let target = UUID(uuidString: targetStr), let type = RelationType(rawValue: typeStr) {
+                    results.append(KnowledgeRelation(id: id, sourceId: source, targetId: target, relationType: type, weight: weight))
+                }
+            }
+        }
+        sqlite3_finalize(stmt)
+        return results
     }
 }

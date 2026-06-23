@@ -23,6 +23,9 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
     private var showPreviewSwitch: NSSwitch!
     private var batchCountField: NSTextField!
     private var batchIntervalField: NSTextField!
+    private var hybridSwitch: NSSwitch!
+    private var summarizationSwitch: NSSwitch!
+    private var crossRefSwitch: NSSwitch!
     private var confidenceSlider: NSSlider!
     private var confidenceLabel: NSTextField!
     private var crosshairFlagBtn: CyberpunkButton!
@@ -207,7 +210,39 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         batchIntervalField.delegate = self
         view.addSubview(batchIntervalField)
 
-        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: -586, width: 90, height: 28))
+        let aiSectionLabel = createLabel(text: "AI & KNOWLEDGE", fontSize: 11, weight: .medium)
+        aiSectionLabel.textColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
+        aiSectionLabel.frame = NSRect(x: 24, y: -576, width: 432, height: 16)
+        view.addSubview(aiSectionLabel)
+
+        var hybridSwitch = NSSwitch()
+        hybridSwitch.frame = NSRect(x: 416, y: -598, width: 40, height: 18)
+        hybridSwitch.target = self
+        hybridSwitch.action = #selector(hybridSearchToggled)
+        view.addSubview(hybridSwitch)
+        let hybridLabel = createLabel(text: "Hybrid Search (vector + text)", fontSize: 12, weight: .regular)
+        hybridLabel.frame = NSRect(x: 24, y: -596, width: 380, height: 22)
+        view.addSubview(hybridLabel)
+
+        var summarizationSwitch = NSSwitch()
+        summarizationSwitch.frame = NSRect(x: 416, y: -626, width: 40, height: 18)
+        summarizationSwitch.target = self
+        summarizationSwitch.action = #selector(summarizationToggled)
+        view.addSubview(summarizationSwitch)
+        let summarizationLabel = createLabel(text: "AI Summarization", fontSize: 12, weight: .regular)
+        summarizationLabel.frame = NSRect(x: 24, y: -624, width: 380, height: 22)
+        view.addSubview(summarizationLabel)
+
+        var crossRefSwitch = NSSwitch()
+        crossRefSwitch.frame = NSRect(x: 416, y: -654, width: 40, height: 18)
+        crossRefSwitch.target = self
+        crossRefSwitch.action = #selector(crossRefToggled)
+        view.addSubview(crossRefSwitch)
+        let crossRefLabel = createLabel(text: "Cross-Reference Engine", fontSize: 12, weight: .regular)
+        crossRefLabel.frame = NSRect(x: 24, y: -652, width: 380, height: 22)
+        view.addSubview(crossRefLabel)
+
+        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: -694, width: 90, height: 28))
         closeBtn.title = "Done"
         closeBtn.glowColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
         closeBtn.target = self
@@ -314,6 +349,9 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         showPreviewSwitch.state = settings.showCapturePreview ? .on : .off
         batchCountField.stringValue = "\(settings.batchCaptureCount)"
         batchIntervalField.stringValue = String(format: "%.1f", settings.batchCaptureInterval)
+        hybridSwitch.state = settings.enableHybridSearch ? .on : .off
+        summarizationSwitch.state = settings.enableSummarization ? .on : .off
+        crossRefSwitch.state = settings.enableCrossReference ? .on : .off
 
         shortcutAreaBtn.title = keyName(for: settings.shortcutArea)
         shortcutWindowBtn.title = keyName(for: settings.shortcutWindow)
@@ -411,6 +449,18 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
 
     @objc private func showPreviewToggled() {
         SettingsManager.shared.showCapturePreview = showPreviewSwitch.state == .on
+    }
+
+    @objc private func hybridSearchToggled() {
+        SettingsManager.shared.enableHybridSearch = hybridSwitch.state == .on
+    }
+
+    @objc private func summarizationToggled() {
+        SettingsManager.shared.enableSummarization = summarizationSwitch.state == .on
+    }
+
+    @objc private func crossRefToggled() {
+        SettingsManager.shared.enableCrossReference = crossRefSwitch.state == .on
     }
 
     @objc private func confidenceChanged() {
@@ -517,6 +567,7 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         case .window: return "Window"
         case .fullScreen: return "Full Screen"
         case .scroll: return "Scroll"
+        case .batch: return "Batch"
         }
     }
 }

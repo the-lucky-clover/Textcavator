@@ -67,6 +67,16 @@
 		97343725ABC84DE7820974C7 /* BatchCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchCaptureController.swift; sourceTree = "<group>"; };
 		6B08373861B9477EA81CDEAE /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7C52D69D054B9898190E2C /* ShortcutRecorder.swift */; };
 		EF7C52D69D054B9898190E2C /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorder.swift; sourceTree = "<group>"; };
+		E451364C93674967982DBB49 /* EmbeddingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C58B2BC534A9AA1EC6C77 /* EmbeddingPlugin.swift */; };
+		8B9C58B2BC534A9AA1EC6C77 /* EmbeddingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddingPlugin.swift; sourceTree = "<group>"; };
+		B88BC16AFD5240118059434F /* DeterministicEmbeddingPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3863B9F9E949A6B1206E4B /* DeterministicEmbeddingPlugin.swift */; };
+		DD3863B9F9E949A6B1206E4B /* DeterministicEmbeddingPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeterministicEmbeddingPlugin.swift; sourceTree = "<group>"; };
+		BC354342984B458C9EB30343 /* EmbeddingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C774290292334427B7283ED6 /* EmbeddingManager.swift */; };
+		C774290292334427B7283ED6 /* EmbeddingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddingManager.swift; sourceTree = "<group>"; };
+		5E0DCDDFD5A34BE9A128B0B8 /* KnowledgeGraphManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AD0C07826741D4918DBCD2 /* KnowledgeGraphManager.swift */; };
+		98AD0C07826741D4918DBCD2 /* KnowledgeGraphManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeGraphManager.swift; sourceTree = "<group>"; };
+		2BA39507445F4E3F9208CDA7 /* CrossReferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F5CB8AAD61F4A64896C8CF1 /* CrossReferenceEngine.swift */; };
+		6F5CB8AAD61F4A64896C8CF1 /* CrossReferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossReferenceEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -117,6 +127,11 @@
 				E33771F6C6BB4C82A3271B85 /* RedactionOverlayView.swift */,
 				433FAC4A2C1A4D0181AA3646 /* BatchCaptureController.swift */,
 				075E9EDDEBE64814958F2D7C /* ShortcutRecorder.swift */,
+							3C961D9ECF9C420894B08B78 /* EmbeddingPlugin.swift */,
+				5775676EB36A4F848D768FAE /* DeterministicEmbeddingPlugin.swift */,
+				4AC08392671949108DADED20 /* EmbeddingManager.swift */,
+				584347CAD3A7408691415DB6 /* KnowledgeGraphManager.swift */,
+				BCDA5D4B2F5242188D0CF231 /* CrossReferenceEngine.swift */,
 			);
 			path = Textcavator;
 			sourceTree = "<group>";
@@ -206,6 +221,11 @@
 			9037EF8A5CF34F8A911C9663 /* RedactionOverlayView.swift in Sources */,
 			597C752838E045B69AC52EDC /* BatchCaptureController.swift in Sources */,
 			2E84BF06389C4EA8AD2BD177 /* ShortcutRecorder.swift in Sources */,
+						E48165B304CB4E48AF6FE34A /* EmbeddingPlugin.swift in Sources */,
+			8FEE3356892E4DB8B872791C /* DeterministicEmbeddingPlugin.swift in Sources */,
+			CDDAE64EF549445FB1971EAA /* EmbeddingManager.swift in Sources */,
+			83D4A4C07D6F4DB89F188C33 /* KnowledgeGraphManager.swift in Sources */,
+			6872B3EFF43342748F917027 /* CrossReferenceEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
