@@ -9,6 +9,7 @@ class StatusBarController {
     
     var onCaptureArea: (() -> Void)?
     var onCaptureWindow: (() -> Void)?
+    var onCaptureScroll: (() -> Void)?
     var onOpenSearch: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onQuit: (() -> Void)?
@@ -80,6 +81,10 @@ class StatusBarController {
             self?.closePopover()
             self?.onCaptureWindow?()
         }
+        popoverViewController.onCaptureScroll = { [weak self] in
+            self?.closePopover()
+            self?.onCaptureScroll?()
+        }
         popoverViewController.onOpenSearch = { [weak self] in
             self?.closePopover()
             self?.onOpenSearch?()
@@ -140,6 +145,7 @@ class StatusBarPopoverViewController: NSViewController {
     
     var onCaptureArea: (() -> Void)?
     var onCaptureWindow: (() -> Void)?
+    var onCaptureScroll: (() -> Void)?
     var onOpenSearch: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onQuit: (() -> Void)?
@@ -153,6 +159,7 @@ class StatusBarPopoverViewController: NSViewController {
     private var subheadlineLabel: NSTextField!
     private var areaButton: CyberpunkButton!
     private var windowButton: CyberpunkButton!
+    private var scrollButton: CyberpunkButton!
     private var captureModeLabel: NSTextField!
     private var featuresTitleLabel: NSTextField!
     private var localFeature: FeatureCardView!
@@ -245,19 +252,26 @@ class StatusBarPopoverViewController: NSViewController {
         statOutput.labelText = LocalizedText.value("statOutputCaption")
         view.addSubview(statOutput)
         
-        areaButton = CyberpunkButton(frame: NSRect(x: 22, y: 294, width: 146, height: 50))
+        areaButton = CyberpunkButton(frame: NSRect(x: 22, y: 294, width: 100, height: 50))
         areaButton.title = LocalizedText.value("crosshair")
         areaButton.glowColor = HUDPalette.cyan
         areaButton.target = self
         areaButton.action = #selector(captureAreaClicked)
         view.addSubview(areaButton)
         
-        windowButton = CyberpunkButton(frame: NSRect(x: 192, y: 294, width: 146, height: 50))
+        windowButton = CyberpunkButton(frame: NSRect(x: 126, y: 294, width: 100, height: 50))
         windowButton.title = LocalizedText.value("window")
         windowButton.glowColor = HUDPalette.violet
         windowButton.target = self
         windowButton.action = #selector(captureWindowClicked)
         view.addSubview(windowButton)
+        
+        scrollButton = CyberpunkButton(frame: NSRect(x: 230, y: 294, width: 100, height: 50))
+        scrollButton.title = "Scroll"
+        scrollButton.glowColor = HUDPalette.amber
+        scrollButton.target = self
+        scrollButton.action = #selector(captureScrollClicked)
+        view.addSubview(scrollButton)
         
         captureModeLabel = createLabel(text: LocalizedText.value("areaReady"), fontSize: 11, weight: .medium)
         captureModeLabel.alignment = .center
@@ -363,16 +377,21 @@ class StatusBarPopoverViewController: NSViewController {
     
     func updateCaptureModeIndicator() {
         let mode = SettingsManager.shared.captureMode
-        if mode == .area {
+        switch mode {
+        case .area:
             captureModeLabel.stringValue = LocalizedText.value("areaReady")
             captureModeLabel.textColor = HUDPalette.mint
-        } else {
+        case .window:
             captureModeLabel.stringValue = LocalizedText.value("windowReady")
             captureModeLabel.textColor = HUDPalette.violet
+        case .scroll:
+            captureModeLabel.stringValue = "Scroll Ready"
+            captureModeLabel.textColor = HUDPalette.amber
         }
-        flagMenuView.updateSelected(mode: mode == .area ? CaptureMode.area : .window)
+        flagMenuView.updateSelected(mode: mode)
         areaButton.isSelected = mode == .area
         windowButton.isSelected = mode == .window
+        scrollButton.isSelected = mode == .scroll
     }
     
     private func refreshLocalizedUI(animated: Bool = true) {
@@ -446,6 +465,12 @@ class StatusBarPopoverViewController: NSViewController {
         SettingsManager.shared.captureMode = .window
         UXSoundPlayer.shared.play(.select)
         onCaptureWindow?()
+    }
+
+    @objc private func captureScrollClicked() {
+        SettingsManager.shared.captureMode = .scroll
+        UXSoundPlayer.shared.play(.select)
+        onCaptureScroll?()
     }
 
     @objc private func searchClicked() {

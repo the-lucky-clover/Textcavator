@@ -47,6 +47,8 @@
 		B4CCBF7EC38E4BCAA7936296 /* OCRReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRReviewView.swift; sourceTree = "<group>"; };
 		11F6764EA712471AB21D3141 /* OCRReviewWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 279519CBF1E9432F904E41AC /* OCRReviewWindowController.swift */; };
 		279519CBF1E9432F904E41AC /* OCRReviewWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRReviewWindowController.swift; sourceTree = "<group>"; };
+		6D4357D4376C4C5ABA8FD4B9 /* ScrollCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBC75719CEC42DA98638DF2 /* ScrollCaptureController.swift */; };
+		9FBC75719CEC42DA98638DF2 /* ScrollCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollCaptureController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -87,6 +89,7 @@
 				DB32E770FD354103AE746590 /* CaptureDetailViewController.swift */,
 							97C311463E1447B2B7D815D2 /* OCRReviewView.swift */,
 				555037351CD64370B14C17AA /* OCRReviewWindowController.swift */,
+							311529A9FCC445BAB0B69F73 /* ScrollCaptureController.swift */,
 			);
 			path = Textcavator;
 			sourceTree = "<group>";
@@ -166,6 +169,7 @@
 			0DDC0B9E8C35409C85E35A1C /* CaptureDetailViewController.swift in Sources */,
 						8517E52CA2CE4ABBAB566BD2 /* OCRReviewView.swift in Sources */,
 			7E12AC49787D4733AECE5F81 /* OCRReviewWindowController.swift in Sources */,
+						54E39F67A05741F5A846C1B7 /* ScrollCaptureController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

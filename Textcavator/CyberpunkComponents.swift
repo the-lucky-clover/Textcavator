@@ -978,7 +978,7 @@ class CaptureSelectionView: NSView {
 
     override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
-        if mode == .window {
+        if mode == .window || mode == .scroll {
             if let window = findWindow(at: point) {
                 onCaptureWindow?(window.id, window.frame)
             } else {
@@ -1031,6 +1031,10 @@ class CaptureSelectionView: NSView {
 
         if mode == .window, let window = hoveredWindow {
             drawWindowHighlight(window.frame, context: context)
+        }
+
+        if mode == .scroll, let window = hoveredWindow {
+            drawScrollHighlight(window.frame, context: context)
         }
 
         let mouse = currentPoint
@@ -1117,6 +1121,28 @@ class CaptureSelectionView: NSView {
         context.setShadow(offset: .zero, blur: 0)
     }
 
+    private func drawScrollHighlight(_ rect: CGRect, context: CGContext) {
+        let fill = NSColor(calibratedRed: 1.0, green: 0.72, blue: 0.22, alpha: 0.1)
+        fill.setFill()
+        NSBezierPath(rect: rect).fill()
+
+        context.setStrokeColor(HUDPalette.amber.withAlphaComponent(0.95).cgColor)
+        context.setLineWidth(3)
+        context.setShadow(offset: .zero, blur: 22, color: HUDPalette.amber.cgColor)
+        let path = NSBezierPath(roundedRect: rect, xRadius: 10, yRadius: 10)
+        path.stroke()
+        context.setShadow(offset: .zero, blur: 0)
+
+        let label = "SCROLL"
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.boldSystemFont(ofSize: 14),
+            .foregroundColor: HUDPalette.amber
+        ]
+        let size = label.size(withAttributes: attributes)
+        let labelRect = NSRect(x: rect.midX - size.width / 2, y: rect.minY - 24, width: size.width, height: size.height)
+        label.draw(in: labelRect, withAttributes: attributes)
+    }
+
     private func findWindow(at point: CGPoint) -> CaptureWindowInfo? {
         let screenHeight = NSScreen.screens.first?.frame.maxY ?? point.y
         let topY = screenHeight - point.y
@@ -1164,7 +1190,14 @@ class CaptureOverlayController {
         view.windows = queryWindows()
         view.onCancel = { [weak self] in self?.cancel() }
         view.onCaptureRect = { [weak self] rect in self?.captureArea(rect) }
-        view.onCaptureWindow = { [weak self] id, frame in self?.captureWindow(id, frame) }
+
+        if mode == .scroll {
+            view.onCaptureWindow = { [weak self] id, frame in
+                self?.startScrollCapture(windowID: id, frame: frame)
+            }
+        } else {
+            view.onCaptureWindow = { [weak self] id, frame in self?.captureWindow(id, frame) }
+        }
         window.contentView = view
 
         overlayWindow = window
@@ -1205,6 +1238,25 @@ class CaptureOverlayController {
         guard let window = overlayWindow else { return }
         let image = captureWindowImage(id, fallbackRect: fallbackRect, from: window)
         finish(with: image, effectRect: screenRectToBottomLeft(fallbackRect))
+    }
+
+    private func startScrollCapture(windowID: CGWindowID, frame: CGRect) {
+        let originalOnCapture = onCapture
+        onCapture = nil
+        cancel(silent: true)
+
+        ScrollCaptureController.shared.startCapture(windowID: windowID, frame: frame) { [weak self] progress, fraction in
+        } onComplete: { [weak self] image in
+            DispatchQueue.main.async {
+                if let image = image {
+                    let effectRect = self?.screenRectToBottomLeft(frame) ?? .zero
+                    if SettingsManager.shared.effectsEnabled {
+                        CaptureEffectWindow().show(at: effectRect, mode: .scroll)
+                    }
+                }
+                originalOnCapture?(image)
+            }
+        }
     }
 
     private func finish(with image: NSImage?, effectRect: NSRect) {
@@ -1833,6 +1885,7 @@ class FeatureCardView: CyberpunkCard {
 class FlagMenuView: NSView {
     var onCaptureArea: (() -> Void)?
     var onCaptureWindow: (() -> Void)?
+    var onCaptureScroll: (() -> Void)?
     var buttonTitle: String = "⚑ Flag Menu" {
         didSet { button.title = buttonTitle }
     }
@@ -1869,6 +1922,9 @@ class FlagMenuView: NSView {
         let windowItem = NSMenuItem(title: "Window Capture ⌘⇧2", action: #selector(windowSelected), keyEquivalent: "")
         windowItem.tag = 2
         captureMenu.addItem(windowItem)
+        let scrollItem = NSMenuItem(title: "Scroll Capture ⌘⇧3", action: #selector(scrollSelected), keyEquivalent: "")
+        scrollItem.tag = 3
+        captureMenu.addItem(scrollItem)
         captureMenu.delegate = self
     }
 
@@ -1879,7 +1935,14 @@ class FlagMenuView: NSView {
 
     func updateSelected(mode: CaptureMode) {
         button.isSelected = true
-        button.glowColor = mode == .area ? HUDPalette.cyan : HUDPalette.violet
+        switch mode {
+        case .area:
+            button.glowColor = HUDPalette.cyan
+        case .window:
+            button.glowColor = HUDPalette.violet
+        case .scroll:
+            button.glowColor = HUDPalette.amber
+        }
     }
 
     @objc private func showMenu() {
@@ -1893,6 +1956,10 @@ class FlagMenuView: NSView {
 
     @objc private func windowSelected() {
         onCaptureWindow?()
+    }
+
+    @objc private func scrollSelected() {
+        onCaptureScroll?()
     }
 }
 

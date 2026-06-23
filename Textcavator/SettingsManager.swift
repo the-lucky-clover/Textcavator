@@ -20,6 +20,7 @@ class SettingsManager {
         static let darkPalette = "textcavator.darkPalette"
         static let showOCRReview = "textcavator.showOCRReview"
         static let autoDeleteScreenshot = "textcavator.autoDeleteScreenshot"
+        static let scrollCaptureSteps = "textcavator.scrollCaptureSteps"
     }
     
     enum OutputMode: String {
@@ -151,6 +152,11 @@ class SettingsManager {
         set { defaults.set(newValue, forKey: Keys.autoDeleteScreenshot) }
     }
 
+    var scrollCaptureSteps: Int {
+        get { defaults.integer(forKey: Keys.scrollCaptureSteps) }
+        set { defaults.set(newValue, forKey: Keys.scrollCaptureSteps) }
+    }
+
     private init() {
         registerDefaults()
     }
@@ -168,7 +174,50 @@ class SettingsManager {
             Keys.autoSaveToDatabase: true,
             Keys.darkPalette: true,
             Keys.showOCRReview: false,
-            Keys.autoDeleteScreenshot: false
+            Keys.autoDeleteScreenshot: true,
+            Keys.scrollCaptureSteps: 50
+        ])
+    }
+
+    func resetToDefaults() {
+        defaults.removeObject(forKey: Keys.outputMode)
+        defaults.removeObject(forKey: Keys.outputFolder)
+        defaults.removeObject(forKey: Keys.launchAtLogin)
+        defaults.removeObject(forKey: Keys.showNotifications)
+        defaults.removeObject(forKey: Keys.captureMode)
+        defaults.removeObject(forKey: Keys.soundEnabled)
+        defaults.removeObject(forKey: Keys.effectsEnabled)
+        defaults.removeObject(forKey: Keys.languageCode)
+        defaults.removeObject(forKey: Keys.minConfidence)
+        defaults.removeObject(forKey: Keys.autoSaveToDatabase)
+        defaults.removeObject(forKey: Keys.darkPalette)
+        defaults.removeObject(forKey: Keys.showOCRReview)
+        defaults.removeObject(forKey: Keys.autoDeleteScreenshot)
+        defaults.removeObject(forKey: Keys.scrollCaptureSteps)
+    }
+            return defaults.bool(forKey: Keys.autoDeleteScreenshot)
+        }
+        set { defaults.set(newValue, forKey: Keys.autoDeleteScreenshot) }
+    }
+
+    private init() {
+        registerDefaults()
+    }
+    
+    private func registerDefaults() {
+        defaults.register(defaults: [
+            Keys.outputMode: OutputMode.clipboard.rawValue,
+            Keys.launchAtLogin: false,
+            Keys.showNotifications: true,
+            Keys.captureMode: CaptureMode.area.rawValue,
+            Keys.soundEnabled: true,
+            Keys.effectsEnabled: true,
+            Keys.languageCode: "en-US",
+            Keys.minConfidence: 0.5,
+            Keys.autoSaveToDatabase: true,
+            Keys.darkPalette: true,
+            Keys.showOCRReview: false,
+            Keys.autoDeleteScreenshot: true
         ])
     }
 

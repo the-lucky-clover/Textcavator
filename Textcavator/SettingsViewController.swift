@@ -1,6 +1,6 @@
 import AppKit
 
-class SettingsViewController: NSViewController {
+class SettingsViewController: NSViewController, NSTextFieldDelegate {
     
     private var outputModeSegment: CyberpunkSegmentedControl!
     private var folderPathField: CyberpunkTextField!
@@ -12,6 +12,8 @@ class SettingsViewController: NSViewController {
     private var darkPaletteSwitch: NSSwitch!
     private var showOCRReviewSwitch: NSSwitch!
     private var autoDeleteScreenshotSwitch: NSSwitch!
+    private var scrollStepsField: NSTextField!
+    private var scrollStepsLabel: NSTextField!
     private var confidenceSlider: NSSlider!
     private var confidenceLabel: NSTextField!
     
@@ -109,16 +111,30 @@ class SettingsViewController: NSViewController {
         addSwitchRow(label: "OCR Review Step (off by default)", y: -40, switchView: &showOCRReviewSwitch, action: #selector(showOCRReviewToggled))
         addSwitchRow(label: "Auto-delete screenshot after copy", y: -68, switchView: &autoDeleteScreenshotSwitch, action: #selector(autoDeleteScreenshotToggled))
 
+        let scrollSectionLabel = createLabel(text: "SCROLL CAPTURE", fontSize: 11, weight: .medium)
+        scrollSectionLabel.textColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
+        scrollSectionLabel.frame = NSRect(x: 24, y: -96, width: 432, height: 16)
+        view.addSubview(scrollSectionLabel)
+
+        scrollStepsLabel = createLabel(text: "Max scroll steps: 50", fontSize: 12, weight: .regular)
+        scrollStepsLabel.frame = NSRect(x: 24, y: -118, width: 432, height: 18)
+        view.addSubview(scrollStepsLabel)
+
+        scrollStepsField = NSTextField(frame: NSRect(x: 24, y: -140, width: 100, height: 22))
+        scrollStepsField.stringValue = "50"
+        scrollStepsField.delegate = self
+        view.addSubview(scrollStepsField)
+
         let filterSectionLabel = createLabel(text: "OCR CONFIDENCE FILTER", fontSize: 11, weight: .medium)
         filterSectionLabel.textColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
-        filterSectionLabel.frame = NSRect(x: 24, y: -50, width: 432, height: 16)
+        filterSectionLabel.frame = NSRect(x: 24, y: -172, width: 432, height: 16)
         view.addSubview(filterSectionLabel)
 
         confidenceLabel = createLabel(text: "Minimum Confidence: 50%", fontSize: 12, weight: .regular)
-        confidenceLabel.frame = NSRect(x: 24, y: -72, width: 432, height: 18)
+        confidenceLabel.frame = NSRect(x: 24, y: -194, width: 432, height: 18)
         view.addSubview(confidenceLabel)
 
-        confidenceSlider = NSSlider(frame: NSRect(x: 24, y: -96, width: 432, height: 20))
+        confidenceSlider = NSSlider(frame: NSRect(x: 24, y: -218, width: 432, height: 20))
         confidenceSlider.minValue = 0.0
         confidenceSlider.maxValue = 1.0
         confidenceSlider.doubleValue = 0.5
@@ -126,7 +142,7 @@ class SettingsViewController: NSViewController {
         confidenceSlider.action = #selector(confidenceChanged)
         view.addSubview(confidenceSlider)
 
-        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: -140, width: 90, height: 28))
+        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: -262, width: 90, height: 28))
         closeBtn.title = "Done"
         closeBtn.glowColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
         closeBtn.target = self
@@ -193,6 +209,7 @@ class SettingsViewController: NSViewController {
         darkPaletteSwitch.state = settings.darkPalette ? .on : .off
         showOCRReviewSwitch.state = settings.showOCRReview ? .on : .off
         autoDeleteScreenshotSwitch.state = settings.autoDeleteScreenshot ? .on : .off
+        scrollStepsField.stringValue = "\(settings.scrollCaptureSteps)"
         confidenceSlider.doubleValue = settings.minConfidence
         confidenceLabel.stringValue = String(format: "Minimum Confidence: %.0f%%", settings.minConfidence * 100)
 
@@ -256,6 +273,15 @@ class SettingsViewController: NSViewController {
 
     @objc private func autoDeleteScreenshotToggled() {
         SettingsManager.shared.autoDeleteScreenshot = autoDeleteScreenshotSwitch.state == .on
+    }
+
+    func controlTextDidEndEditing(_ obj: Notification) {
+        if let field = obj.object as? NSTextField, field == scrollStepsField {
+            let value = Int(field.stringValue) ?? 50
+            SettingsManager.shared.scrollCaptureSteps = max(10, min(200, value))
+            scrollStepsField.stringValue = "\(SettingsManager.shared.scrollCaptureSteps)"
+            scrollStepsLabel.stringValue = "Max scroll steps: \(SettingsManager.shared.scrollCaptureSteps)"
+        }
     }
 
     @objc private func confidenceChanged() {

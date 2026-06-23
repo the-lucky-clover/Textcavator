@@ -5,6 +5,7 @@ import Vision
 enum CaptureMode {
     case area
     case window
+    case scroll
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -67,6 +68,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         statusBarController.onCaptureWindow = { [weak self] in
             self?.captureScreenshot(mode: .window)
+        }
+
+        statusBarController.onCaptureScroll = { [weak self] in
+            self?.captureScreenshot(mode: .scroll)
         }
         
         statusBarController.onOpenSearch = { [weak self] in
@@ -138,6 +143,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             } else if keyCode == 19 {
                 DispatchQueue.main.async { [weak self] in
                     self?.captureScreenshot(mode: .window)
+                }
+                return nil
+            } else if keyCode == 20 {
+                DispatchQueue.main.async { [weak self] in
+                    self?.captureScreenshot(mode: .scroll)
                 }
                 return nil
             }
