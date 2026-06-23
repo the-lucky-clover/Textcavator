@@ -1,0 +1,331 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0AA92F98CE7120AD6483916D /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAFFA1921449A30708F0E3F6 /* StatusBarController.swift */; };
+		16713789306F438EA083348A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8862CBF41BB2A30D4B1B84F1 /* main.swift */; };
+		5D9BC0995AD4B4E7D59B7057 /* CyberpunkComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B83334CD200CCAC1F270D76 /* CyberpunkComponents.swift */; };
+		9A3677347651AAF169769300 /* TextcavatorWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358BB61B0B115F7F022C4AA8 /* TextcavatorWindowController.swift */; };
+		A1199503851355E1C3B60416 /* ProgressPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1696DADEBB331AA6324C05D /* ProgressPopoverView.swift */; };
+		A9B317965BC812DA02E71A02 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F820799BABF7EA479E5511B /* SettingsWindowController.swift */; };
+		BCDA6992E114D080BD4E5079 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5EC7B19B47D6740AACABD0 /* SettingsManager.swift */; };
+		D3B1F959B4C649009C9F595A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C397D43468E9B8CF8D3E95 /* AppDelegate.swift */; };
+		D56082D764AF7121CCB04A7A /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C885EF5E1FE77E337A30EF9 /* SettingsViewController.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0131E29189300471EB5EF632 /* Textcavator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Textcavator.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0B83334CD200CCAC1F270D76 /* CyberpunkComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberpunkComponents.swift; sourceTree = "<group>"; };
+		2637DCF02C74DF8AE6281E41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		2F820799BABF7EA479E5511B /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
+		358BB61B0B115F7F022C4AA8 /* TextcavatorWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextcavatorWindowController.swift; sourceTree = "<group>"; };
+		3AB9B4D64754ECA481C60542 /* Textcavator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Textcavator.entitlements; sourceTree = "<group>"; };
+		3C885EF5E1FE77E337A30EF9 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		8862CBF41BB2A30D4B1B84F1 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		B2C397D43468E9B8CF8D3E95 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		BAFFA1921449A30708F0E3F6 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		CE5EC7B19B47D6740AACABD0 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		D1696DADEBB331AA6324C05D /* ProgressPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressPopoverView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		620C7B2F9C9E0CA818C5C4A3 = {
+			isa = PBXGroup;
+			children = (
+				DBE65918ABA28F1F63B5F604 /* Textcavator */,
+				C5FF2E47C1432249358AAB42 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C5FF2E47C1432249358AAB42 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0131E29189300471EB5EF632 /* Textcavator.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DBE65918ABA28F1F63B5F604 /* Textcavator */ = {
+			isa = PBXGroup;
+			children = (
+				B2C397D43468E9B8CF8D3E95 /* AppDelegate.swift */,
+				0B83334CD200CCAC1F270D76 /* CyberpunkComponents.swift */,
+				2637DCF02C74DF8AE6281E41 /* Info.plist */,
+				8862CBF41BB2A30D4B1B84F1 /* main.swift */,
+				D1696DADEBB331AA6324C05D /* ProgressPopoverView.swift */,
+				CE5EC7B19B47D6740AACABD0 /* SettingsManager.swift */,
+				3C885EF5E1FE77E337A30EF9 /* SettingsViewController.swift */,
+				2F820799BABF7EA479E5511B /* SettingsWindowController.swift */,
+				BAFFA1921449A30708F0E3F6 /* StatusBarController.swift */,
+				3AB9B4D64754ECA481C60542 /* Textcavator.entitlements */,
+				358BB61B0B115F7F022C4AA8 /* TextcavatorWindowController.swift */,
+			);
+			path = Textcavator;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4A62CFFB835F23FCEB143E57 /* Textcavator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9FB844CB70AA95C21F152945 /* Build configuration list for PBXNativeTarget "Textcavator" */;
+			buildPhases = (
+				8287F293CF537AC37EA035E8 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Textcavator;
+			packageProductDependencies = (
+			);
+			productName = Textcavator;
+			productReference = 0131E29189300471EB5EF632 /* Textcavator.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5EAC39BB891B246766171E1C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					4A62CFFB835F23FCEB143E57 = {
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = D1CA56E0E00438F95A44F97B /* Build configuration list for PBXProject "Textcavator" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 620C7B2F9C9E0CA818C5C4A3;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C5FF2E47C1432249358AAB42 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4A62CFFB835F23FCEB143E57 /* Textcavator */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8287F293CF537AC37EA035E8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D3B1F959B4C649009C9F595A /* AppDelegate.swift in Sources */,
+				5D9BC0995AD4B4E7D59B7057 /* CyberpunkComponents.swift in Sources */,
+				A1199503851355E1C3B60416 /* ProgressPopoverView.swift in Sources */,
+				BCDA6992E114D080BD4E5079 /* SettingsManager.swift in Sources */,
+				D56082D764AF7121CCB04A7A /* SettingsViewController.swift in Sources */,
+				A9B317965BC812DA02E71A02 /* SettingsWindowController.swift in Sources */,
+				0AA92F98CE7120AD6483916D /* StatusBarController.swift in Sources */,
+				9A3677347651AAF169769300 /* TextcavatorWindowController.swift in Sources */,
+				16713789306F438EA083348A /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2D75216FAD2818683FB73700 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = Textcavator;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		433FA3E14B69DD2EB3E4D50C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = Textcavator;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		6256147C9B9FA99AC317AB0A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Textcavator/Textcavator.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				INFOPLIST_FILE = Textcavator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.textcavator.app;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		F4BB7FE55DE9B04DBC5D5EC9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Textcavator/Textcavator.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				INFOPLIST_FILE = Textcavator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.textcavator.app;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9FB844CB70AA95C21F152945 /* Build configuration list for PBXNativeTarget "Textcavator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4BB7FE55DE9B04DBC5D5EC9 /* Debug */,
+				6256147C9B9FA99AC317AB0A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D1CA56E0E00438F95A44F97B /* Build configuration list for PBXProject "Textcavator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D75216FAD2818683FB73700 /* Debug */,
+				433FA3E14B69DD2EB3E4D50C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5EAC39BB891B246766171E1C /* Project object */;
+}

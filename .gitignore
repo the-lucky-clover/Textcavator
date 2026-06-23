@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+xcuserdata/
+*.xcodepkg
+
+# IDE
+.idea/
+.vscode/
+
+# Build artifacts
+build/
+DerivedData/
+
+# Session logs
+.waylog/
+.snapshots/
+
+# Lock files
+*.lock
