@@ -135,6 +135,34 @@ class TextcavatorDatabase {
         execute(createRedactionIndex)
         execute(createRedactionIndex2)
 
+        let createSavedSearches = """
+        CREATE TABLE IF NOT EXISTS saved_searches (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            filter_json TEXT NOT NULL,
+            created_at REAL NOT NULL,
+            last_used REAL NOT NULL,
+            use_count INTEGER NOT NULL DEFAULT 0
+        );
+        """
+
+        let createSmartCollections = """
+        CREATE TABLE IF NOT EXISTS smart_collections (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT,
+            filter_json TEXT NOT NULL,
+            icon TEXT,
+            color TEXT,
+            auto_update INTEGER NOT NULL DEFAULT 1,
+            created_at REAL NOT NULL
+        );
+        """
+
+        execute(createSavedSearches)
+        execute(createSmartCollections)
+        seedSmartCollections()
+
         seedRedactionTemplates()
     }
 
@@ -440,6 +468,260 @@ class TextcavatorDatabase {
                 let toolSet = template.defaultTools.map { $0.rawValue }.joined(separator: ",")
                 sqlite3_bind_text(stmt, 3, toolSet, -1, nil)
                 sqlite3_bind_text(stmt, 4, "{}", -1, nil)
+                sqlite3_step(stmt)
+            }
+            sqlite3_finalize(stmt)
+        }
+    }
+
+    // MARK: - Saved Searches
+
+    func saveSearch(_ saved: SavedSearch) {
+        guard let db = db, let filterData = try? JSONEncoder().encode(saved.filter) else { return }
+        let filterJson = String(data: filterData, encoding: .utf8) ?? "{}"
+        let sql = """
+        INSERT OR REPLACE INTO saved_searches (id, name, filter_json, created_at, last_used, use_count)
+        VALUES (?, ?, ?, ?, ?, ?);
+        """
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, saved.id.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 2, saved.name, -1, nil)
+            sqlite3_bind_text(stmt, 3, filterJson, -1, nil)
+            sqlite3_bind_double(stmt, 4, saved.createdAt.timeIntervalSince1970)
+            sqlite3_bind_double(stmt, 5, saved.lastUsed.timeIntervalSince1970)
+            sqlite3_bind_int(stmt, 6, Int32(saved.useCount))
+            sqlite3_step(stmt)
+        }
+        sqlite3_finalize(stmt)
+    }
+
+    func savedSearches() -> [SavedSearch] {
+        var results: [SavedSearch] = []
+        guard let db = db else { return results }
+        let sql = "SELECT id, name, filter_json, created_at, last_used, use_count FROM saved_searches ORDER BY use_count DESC, last_used DESC;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                let idStr = String(cString: sqlite3_column_text(stmt, 0))
+                let name = String(cString: sqlite3_column_text(stmt, 1))
+                let filterJson = String(cString: sqlite3_column_text(stmt, 2))
+                let created = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 3))
+                let lastUsed = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 4))
+                let useCount = Int(sqlite3_column_int(stmt, 5))
+                if let id = UUID(uuidString: idStr), let data = filterJson.data(using: .utf8), let filter = try? JSONDecoder().decode(SearchFilter.self, from: data) {
+                    results.append(SavedSearch(id: id, name: name, filter: filter))
+                }
+            }
+        }
+        sqlite3_finalize(stmt)
+        return results
+    }
+
+    func deleteSavedSearch(_ id: UUID) {
+        guard let db = db else { return }
+        let sql = "DELETE FROM saved_searches WHERE id = ?;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, id.uuidString, -1, nil)
+            sqlite3_step(stmt)
+        }
+        sqlite3_finalize(stmt)
+    }
+
+    // MARK: - Smart Collections
+
+    func saveSmartCollection(_ collection: SmartCollection) {
+        guard let db = db, let filterData = try? JSONEncoder().encode(collection.filter) else { return }
+        let filterJson = String(data: filterData, encoding: .utf8) ?? "{}"
+        let sql = """
+        INSERT OR REPLACE INTO smart_collections (id, name, description, filter_json, icon, color, auto_update, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        """
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, collection.id.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 2, collection.name, -1, nil)
+            sqlite3_bind_text(stmt, 3, collection.description, -1, nil)
+            sqlite3_bind_text(stmt, 4, filterJson, -1, nil)
+            sqlite3_bind_text(stmt, 5, collection.icon, -1, nil)
+            sqlite3_bind_text(stmt, 6, collection.color, -1, nil)
+            sqlite3_bind_int(stmt, 7, collection.autoUpdate ? 1 : 0)
+            sqlite3_bind_double(stmt, 8, collection.createdAt.timeIntervalSince1970)
+            sqlite3_step(stmt)
+        }
+        sqlite3_finalize(stmt)
+    }
+
+    func smartCollections() -> [SmartCollection] {
+        var results: [SmartCollection] = []
+        guard let db = db else { return results }
+        let sql = "SELECT id, name, description, filter_json, icon, color, auto_update, created_at FROM smart_collections ORDER BY name;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                let idStr = String(cString: sqlite3_column_text(stmt, 0))
+                let name = String(cString: sqlite3_column_text(stmt, 1))
+                let desc = String(cString: sqlite3_column_text(stmt, 2))
+                let filterJson = String(cString: sqlite3_column_text(stmt, 3))
+                let icon = String(cString: sqlite3_column_text(stmt, 4))
+                let color = String(cString: sqlite3_column_text(stmt, 5))
+                let autoUpdate = sqlite3_column_int(stmt, 6) != 0
+                let created = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 7))
+                if let id = UUID(uuidString: idStr), let data = filterJson.data(using: .utf8), let filter = try? JSONDecoder().decode(SearchFilter.self, from: data) {
+                    results.append(SmartCollection(id: id, name: name, description: desc, filter: filter, icon: icon, color: color, autoUpdate: autoUpdate))
+                }
+            }
+        }
+        sqlite3_finalize(stmt)
+        return results
+    }
+
+    func deleteSmartCollection(_ id: UUID) {
+        guard let db = db else { return }
+        let sql = "DELETE FROM smart_collections WHERE id = ?;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, id.uuidString, -1, nil)
+            sqlite3_step(stmt)
+        }
+        sqlite3_finalize(stmt)
+    }
+
+    // MARK: - Search Suggestions
+
+    func searchSuggestions(prefix: String, limit: Int = 10) -> [String] {
+        var results: [String] = []
+        guard let db = db, !prefix.isEmpty else { return results }
+        let sql = """
+        SELECT DISTINCT snippet(captures_fts, 2, '', '', '', 0) as term
+        FROM captures_fts
+        WHERE captures_fts MATCH ?
+        LIMIT ?;
+        """
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, "\(prefix)*", -1, nil)
+            sqlite3_bind_int(stmt, 2, Int32(limit))
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                if let term = sqlite3_column_text(stmt, 0).map({ String(cString: $0) }), !term.isEmpty {
+                    results.append(term)
+                }
+            }
+        }
+        sqlite3_finalize(stmt)
+        return results
+    }
+
+    // MARK: - Filtered Search
+
+    func searchWithFilter(_ filter: SearchFilter, limit: Int = 50) -> [(record: CaptureRecord, snippet: String)] {
+        var results: [(CaptureRecord, String)] = []
+        guard let db = db else { return results }
+
+        var clauses: [String] = []
+        var args: [Any] = []
+
+        if !filter.query.isEmpty {
+            clauses.append("c.ocr_text LIKE ?")
+            args.append("%\(filter.query)%")
+        }
+        if let app = filter.app {
+            clauses.append("c.source_app = ?")
+            args.append(app)
+        }
+        if let lang = filter.language {
+            clauses.append("c.language = ?")
+            args.append(lang)
+        }
+        if let minC = filter.minConfidence {
+            clauses.append("c.confidence >= ?")
+            args.append(NSNumber(value: minC))
+        }
+        if let maxC = filter.maxConfidence {
+            clauses.append("c.confidence <= ?")
+            args.append(NSNumber(value: maxC))
+        }
+        if let from = filter.dateFrom {
+            clauses.append("c.captured_at >= ?")
+            args.append(NSNumber(value: from.timeIntervalSince1970))
+        }
+        if let to = filter.dateTo {
+            clauses.append("c.captured_at <= ?")
+            args.append(NSNumber(value: to.timeIntervalSince1970))
+        }
+
+        let whereClause = clauses.isEmpty ? "" : "WHERE " + clauses.joined(separator: " AND ")
+        let sql = """
+        SELECT c.id, c.image_path, c.thumbnail_path, c.width, c.height, c.source_app, c.captured_at, c.ocr_text, c.confidence, c.language, c.ocr_status,
+               COALESCE(snippet(captures_fts, 2, '<mark>', '</mark>', '...', 64), '') as snippet
+        FROM captures c
+        LEFT JOIN captures_fts fts ON c.id = fts.id
+        \(whereClause)
+        ORDER BY c.captured_at DESC
+        LIMIT ?;
+        """
+
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            for (index, arg) in args.enumerated() {
+                if let str = arg as? String {
+                    sqlite3_bind_text(stmt, Int32(index + 1), str, -1, nil)
+                } else if let num = arg as? NSNumber {
+                    if strcmp(num.objCType, "f") == 0 || strcmp(num.objCType, "d") == 0 {
+                        sqlite3_bind_double(stmt, Int32(index + 1), num.doubleValue)
+                    } else {
+                        sqlite3_bind_int(stmt, Int32(index + 1), Int32(num.intValue))
+                    }
+                }
+            }
+            sqlite3_bind_int(stmt, Int32(args.count + 1), Int32(limit))
+
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                let idStr = String(cString: sqlite3_column_text(stmt, 0))
+                let imagePath = String(cString: sqlite3_column_text(stmt, 1))
+                let thumb = sqlite3_column_text(stmt, 2).map { String(cString: $0) }
+                let width = Int(sqlite3_column_int(stmt, 3))
+                let height = Int(sqlite3_column_int(stmt, 4))
+                let app = String(cString: sqlite3_column_text(stmt, 5))
+                let date = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 6))
+                let text = sqlite3_column_text(stmt, 7).map { String(cString: $0) }
+                let conf = sqlite3_column_double(stmt, 8)
+                let lang = sqlite3_column_text(stmt, 9).map { String(cString: $0) }
+                let status = String(cString: sqlite3_column_text(stmt, 10))
+                let snippet = String(cString: sqlite3_column_text(stmt, 11))
+                if let uuid = UUID(uuidString: idStr) {
+                    results.append((CaptureRecord(id: uuid, imagePath: imagePath, thumbnailPath: thumb, width: width, height: height, sourceApp: app, capturedAt: date, ocrText: text, confidence: conf, language: lang, ocrStatus: status), snippet))
+                }
+            }
+        }
+        sqlite3_finalize(stmt)
+        return results
+    }
+
+    private func seedSmartCollections() {
+        let collections: [(String, SmartCollection)] = [
+            ("Recent Captures", SmartCollection(name: "Recent Captures", description: "Last 24 hours", filter: SearchFilter(dateFrom: Calendar.current.date(byAdding: .day, value: -1, to: Date())), icon: "clock.fill", color: "#00D4FF")),
+            ("High Confidence", SmartCollection(name: "High Confidence", description: "Confidence >= 90%", filter: SearchFilter(minConfidence: 0.9), icon: "star.fill", color: "#FFD60A")),
+            ("Low Confidence", SmartCollection(name: "Low Confidence", description: "Needs review", filter: SearchFilter(maxConfidence: 0.5), icon: "exclamationmark.triangle.fill", color: "#FF453A"))
+        ]
+        for (_, collection) in collections {
+            let id = UUID().uuidString
+            let sql = "INSERT OR IGNORE INTO smart_collections (id, name, description, filter_json, icon, color, auto_update, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+            var stmt: OpaquePointer?
+            if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+                sqlite3_bind_text(stmt, 1, id, -1, nil)
+                sqlite3_bind_text(stmt, 2, collection.name, -1, nil)
+                sqlite3_bind_text(stmt, 3, collection.description, -1, nil)
+                if let filterData = try? JSONEncoder().encode(collection.filter), let filterJson = String(data: filterData, encoding: .utf8) {
+                    sqlite3_bind_text(stmt, 4, filterJson, -1, nil)
+                } else {
+                    sqlite3_bind_text(stmt, 4, "{}", -1, nil)
+                }
+                sqlite3_bind_text(stmt, 5, collection.icon, -1, nil)
+                sqlite3_bind_text(stmt, 6, collection.color, -1, nil)
+                sqlite3_bind_int(stmt, 7, collection.autoUpdate ? 1 : 0)
+                sqlite3_bind_double(stmt, 8, collection.createdAt.timeIntervalSince1970)
                 sqlite3_step(stmt)
             }
             sqlite3_finalize(stmt)
