@@ -43,6 +43,10 @@
 		09FA5ED91B7F490483CC23DB /* CaptureDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C1245A58874FFB858CA368 /* CaptureDetailViewController.swift */; };
 		97C1245A58874FFB858CA368 /* CaptureDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDetailViewController.swift; sourceTree = "<group>"; };
 		63205174872B43E89E1D234C /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.c.objc"; path = libsqlite3.tbd; sourceTree = "<group>"; };
+		47FDB72758CC490AA455CF94 /* OCRReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4CCBF7EC38E4BCAA7936296 /* OCRReviewView.swift */; };
+		B4CCBF7EC38E4BCAA7936296 /* OCRReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRReviewView.swift; sourceTree = "<group>"; };
+		11F6764EA712471AB21D3141 /* OCRReviewWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 279519CBF1E9432F904E41AC /* OCRReviewWindowController.swift */; };
+		279519CBF1E9432F904E41AC /* OCRReviewWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRReviewWindowController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -81,6 +85,8 @@
 				FE9A8B9A6BE24457B6ABFAA0 /* SearchWindowController.swift */,
 				8692C8481C704EB9AAB724D7 /* SearchResultViewController.swift */,
 				DB32E770FD354103AE746590 /* CaptureDetailViewController.swift */,
+							97C311463E1447B2B7D815D2 /* OCRReviewView.swift */,
+				555037351CD64370B14C17AA /* OCRReviewWindowController.swift */,
 			);
 			path = Textcavator;
 			sourceTree = "<group>";
@@ -158,6 +164,8 @@
 			D7BC35280863473B977E9210 /* SearchWindowController.swift in Sources */,
 			A5FA48368F944B878EBFD801 /* SearchResultViewController.swift in Sources */,
 			0DDC0B9E8C35409C85E35A1C /* CaptureDetailViewController.swift in Sources */,
+						8517E52CA2CE4ABBAB566BD2 /* OCRReviewView.swift in Sources */,
+			7E12AC49787D4733AECE5F81 /* OCRReviewWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

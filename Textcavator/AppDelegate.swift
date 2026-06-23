@@ -183,7 +183,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func processImage(_ image: NSImage) {
         guard showProgressPopover() else { return }
         progressPopover.updateProgress(0.08, status: "Image buffered locally")
-        
+
+        let tempPath = "/tmp/textcavator_last_capture.png"
+        if let tiffData = image.tiffRepresentation,
+           let bitmap = NSBitmapImageRep(data: tiffData),
+           let pngData = bitmap.representation(using: .png, properties: [.compressionFactor: 0.8]) {
+            try? pngData.write(to: URL(fileURLWithPath: tempPath), options: .atomic)
+        }
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self] in
             self?.performOCR(on: image)
         }
@@ -230,7 +237,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     obs.topCandidates(1).first?.confidence
                 }.reduce(0.0, +) / Double(observations.count)
 
-                self.handleOutput(text: recognizedText, confidence: avgConfidence)
+                self.handleOutput(text: recognizedText, confidence: avgConfidence, observations: observations, image: image)
             }
         }
         
@@ -254,24 +261,90 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    private func handleOutput(text: String, confidence: Double = 0.0) {
+    private func handleOutput(text: String, confidence: Double = 0.0, observations: [VNRecognizedTextObservation] = [], image: NSImage? = nil) {
         guard let progressPopover = progressPopover else { return }
-        progressPopover.updateProgress(0.88, status: "Saving output...")
-
         let settings = SettingsManager.shared
 
-        saveToDatabase(text: text, confidence: confidence)
+        if settings.showOCRReview, let image = image, !observations.isEmpty {
+            progressPopover.updateProgress(0.95, status: "Awaiting review...")
+            showOCRReviewWindow(image: image, observations: observations, text: text, confidence: confidence)
+        } else {
+            progressPopover.updateProgress(0.88, status: "Saving output...")
+            finalizeOutput(text: text, confidence: confidence)
+            progressPopover.updateProgress(1.0, status: "Done")
+            progressPopover.complete()
+            UXSoundPlayer.shared.play(.complete)
+        }
+    }
 
+    private func showOCRReviewWindow(image: NSImage, observations: [VNRecognizedTextObservation], text: String, confidence: Double) {
+        let reviewWindow = OCRReviewWindowController(
+            image: image,
+            observations: observations
+        ) { [weak self] confirmedText, _ in
+            guard let self = self else { return }
+            self.finalizeOutput(text: confirmedText, confidence: confidence)
+            if SettingsManager.shared.autoDeleteScreenshot {
+                self.autoDeleteLastCapture()
+            }
+            self.progressPopover?.updateProgress(1.0, status: "Done")
+            self.progressPopover?.complete()
+            UXSoundPlayer.shared.play(.complete)
+        } rescan: { [weak self] in
+            guard let self = self else { return }
+            self.progressPopover?.updateProgress(0.52, status: "Re-scanning image...")
+            self.rerunOCR(on: image)
+        } cancel: { [weak self] in
+            guard let self = self else { return }
+            self.progressPopover?.updateProgress(1.0, status: "Cancelled")
+            self.progressPopover?.complete()
+            UXSoundPlayer.shared.play(.cancel)
+        }
+        reviewWindow.show()
+    }
+
+    private func rerunOCR(on image: NSImage) {
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return }
+        let request = VNRecognizeTextRequest { [weak self] request, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                if let error {
+                    self.progressPopover?.updateProgress(1.0, status: "Rescan Error: \(error.localizedDescription)")
+                    self.progressPopover?.complete()
+                    return
+                }
+                guard let observations = request.results as? [VNRecognizedTextObservation], !observations.isEmpty else {
+                    self.progressPopover?.updateProgress(1.0, status: "No text found on rescan")
+                    self.progressPopover?.complete()
+                    return
+                }
+                let text = observations.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+                let avgConfidence = observations.compactMap { $0.topCandidates(1).first?.confidence }.reduce(0.0, +) / Double(observations.count)
+                self.handleOutput(text: text, confidence: avgConfidence, observations: observations, image: image)
+            }
+        }
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
+        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+        DispatchQueue.global(qos: .userInitiated).async {
+            try? handler.perform([request])
+        }
+    }
+
+    private func finalizeOutput(text: String, confidence: Double) {
+        let settings = SettingsManager.shared
+        saveToDatabase(text: text, confidence: confidence)
         switch settings.outputMode {
         case .clipboard:
             copyToClipboard(text: text)
         case .textFile:
             saveToTextFile(text: text)
         }
+    }
 
-        progressPopover.updateProgress(1.0, status: "Done")
-        progressPopover.complete()
-        UXSoundPlayer.shared.play(.complete)
+    private func autoDeleteLastCapture() {
+        let tempPath = "/tmp/textcavator_last_capture.png"
+        try? FileManager.default.removeItem(atPath: tempPath)
     }
 
     private func saveToDatabase(text: String, confidence: Double) {

@@ -10,6 +10,8 @@ class SettingsViewController: NSViewController {
     private var particleEffectsSwitch: NSSwitch!
     private var autoSaveSwitch: NSSwitch!
     private var darkPaletteSwitch: NSSwitch!
+    private var showOCRReviewSwitch: NSSwitch!
+    private var autoDeleteScreenshotSwitch: NSSwitch!
     private var confidenceSlider: NSSlider!
     private var confidenceLabel: NSTextField!
     
@@ -104,6 +106,8 @@ class SettingsViewController: NSViewController {
         addSwitchRow(label: "Particle Effects", y: 44, switchView: &particleEffectsSwitch, action: #selector(effectsToggled))
         addSwitchRow(label: "Auto-save to Vault", y: 16, switchView: &autoSaveSwitch, action: #selector(autoSaveToggled))
         addSwitchRow(label: "Dark Mode", y: -12, switchView: &darkPaletteSwitch, action: #selector(darkPaletteToggled))
+        addSwitchRow(label: "OCR Review Step (off by default)", y: -40, switchView: &showOCRReviewSwitch, action: #selector(showOCRReviewToggled))
+        addSwitchRow(label: "Auto-delete screenshot after copy", y: -68, switchView: &autoDeleteScreenshotSwitch, action: #selector(autoDeleteScreenshotToggled))
 
         let filterSectionLabel = createLabel(text: "OCR CONFIDENCE FILTER", fontSize: 11, weight: .medium)
         filterSectionLabel.textColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
@@ -187,6 +191,8 @@ class SettingsViewController: NSViewController {
         particleEffectsSwitch.state = settings.effectsEnabled ? .on : .off
         autoSaveSwitch.state = settings.autoSaveToDatabase ? .on : .off
         darkPaletteSwitch.state = settings.darkPalette ? .on : .off
+        showOCRReviewSwitch.state = settings.showOCRReview ? .on : .off
+        autoDeleteScreenshotSwitch.state = settings.autoDeleteScreenshot ? .on : .off
         confidenceSlider.doubleValue = settings.minConfidence
         confidenceLabel.stringValue = String(format: "Minimum Confidence: %.0f%%", settings.minConfidence * 100)
 
@@ -242,6 +248,14 @@ class SettingsViewController: NSViewController {
 
     @objc private func darkPaletteToggled() {
         SettingsManager.shared.darkPalette = darkPaletteSwitch.state == .on
+    }
+
+    @objc private func showOCRReviewToggled() {
+        SettingsManager.shared.showOCRReview = showOCRReviewSwitch.state == .on
+    }
+
+    @objc private func autoDeleteScreenshotToggled() {
+        SettingsManager.shared.autoDeleteScreenshot = autoDeleteScreenshotSwitch.state == .on
     }
 
     @objc private func confidenceChanged() {

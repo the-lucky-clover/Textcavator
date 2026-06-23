@@ -18,6 +18,8 @@ class SettingsManager {
         static let minConfidence = "textcavator.minConfidence"
         static let autoSaveToDatabase = "textcavator.autoSaveToDatabase"
         static let darkPalette = "textcavator.darkPalette"
+        static let showOCRReview = "textcavator.showOCRReview"
+        static let autoDeleteScreenshot = "textcavator.autoDeleteScreenshot"
     }
     
     enum OutputMode: String {
@@ -129,6 +131,26 @@ class SettingsManager {
         set { defaults.set(newValue, forKey: Keys.darkPalette) }
     }
 
+    var showOCRReview: Bool {
+        get {
+            if defaults.object(forKey: Keys.showOCRReview) == nil {
+                return false
+            }
+            return defaults.bool(forKey: Keys.showOCRReview)
+        }
+        set { defaults.set(newValue, forKey: Keys.showOCRReview) }
+    }
+
+    var autoDeleteScreenshot: Bool {
+        get {
+            if defaults.object(forKey: Keys.autoDeleteScreenshot) == nil {
+                return false
+            }
+            return defaults.bool(forKey: Keys.autoDeleteScreenshot)
+        }
+        set { defaults.set(newValue, forKey: Keys.autoDeleteScreenshot) }
+    }
+
     private init() {
         registerDefaults()
     }
@@ -144,7 +166,9 @@ class SettingsManager {
             Keys.languageCode: "en-US",
             Keys.minConfidence: 0.5,
             Keys.autoSaveToDatabase: true,
-            Keys.darkPalette: true
+            Keys.darkPalette: true,
+            Keys.showOCRReview: false,
+            Keys.autoDeleteScreenshot: false
         ])
     }
 
@@ -160,5 +184,7 @@ class SettingsManager {
         defaults.removeObject(forKey: Keys.minConfidence)
         defaults.removeObject(forKey: Keys.autoSaveToDatabase)
         defaults.removeObject(forKey: Keys.darkPalette)
+        defaults.removeObject(forKey: Keys.showOCRReview)
+        defaults.removeObject(forKey: Keys.autoDeleteScreenshot)
     }
 }
