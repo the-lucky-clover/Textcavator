@@ -77,6 +77,8 @@
 		98AD0C07826741D4918DBCD2 /* KnowledgeGraphManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeGraphManager.swift; sourceTree = "<group>"; };
 		2BA39507445F4E3F9208CDA7 /* CrossReferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F5CB8AAD61F4A64896C8CF1 /* CrossReferenceEngine.swift */; };
 		6F5CB8AAD61F4A64896C8CF1 /* CrossReferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossReferenceEngine.swift; sourceTree = "<group>"; };
+		99C0B08C41FA446CA42454E9 /* RedactionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5C6F2212AB4E318F6D36DE /* RedactionWindowController.swift */; };
+		6B5C6F2212AB4E318F6D36DE /* RedactionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedactionWindowController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -132,6 +134,7 @@
 				4AC08392671949108DADED20 /* EmbeddingManager.swift */,
 				584347CAD3A7408691415DB6 /* KnowledgeGraphManager.swift */,
 				BCDA5D4B2F5242188D0CF231 /* CrossReferenceEngine.swift */,
+							BCAF596F65DC4178950DEB9A /* RedactionWindowController.swift */,
 			);
 			path = Textcavator;
 			sourceTree = "<group>";
@@ -226,6 +229,7 @@
 			CDDAE64EF549445FB1971EAA /* EmbeddingManager.swift in Sources */,
 			83D4A4C07D6F4DB89F188C33 /* KnowledgeGraphManager.swift in Sources */,
 			6872B3EFF43342748F917027 /* CrossReferenceEngine.swift in Sources */,
+						48A8FD19C902440E833F91BD /* RedactionWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

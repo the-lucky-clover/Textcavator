@@ -93,15 +93,49 @@ class TextcavatorDatabase {
         let createRelationsIndex = "CREATE INDEX IF NOT EXISTS idx_knowledge_relations_source ON knowledge_relations(source_id);"
         let createRelationsIndex2 = "CREATE INDEX IF NOT EXISTS idx_knowledge_relations_target ON knowledge_relations(target_id);"
 
+        let createRedactionAudit = """
+        CREATE TABLE IF NOT EXISTS redaction_audit_log (
+            id TEXT PRIMARY KEY,
+            capture_id TEXT NOT NULL,
+            region_id TEXT NOT NULL,
+            tool TEXT NOT NULL,
+            rect_x REAL NOT NULL,
+            rect_y REAL NOT NULL,
+            rect_width REAL NOT NULL,
+            rect_height REAL NOT NULL,
+            note_text TEXT,
+            applied_at REAL NOT NULL,
+            exported_safe INTEGER NOT NULL DEFAULT 0
+        );
+        """
+
+        let createRedactionTemplates = """
+        CREATE TABLE IF NOT EXISTS redaction_templates (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            tool_set TEXT NOT NULL,
+            config_json TEXT
+        );
+        """
+
+        let createRedactionIndex = "CREATE INDEX IF NOT EXISTS idx_redaction_audit_capture ON redaction_audit_log(capture_id);"
+        let createRedactionIndex2 = "CREATE INDEX IF NOT EXISTS idx_redaction_audit_exported ON redaction_audit_log(exported_safe);"
+
         execute(createCaptures)
         execute(createFTS)
         execute(createKnowledgeAssets)
         execute(createKnowledgeRelations)
+        execute(createRedactionAudit)
+        execute(createRedactionTemplates)
         execute(createIndex)
         execute(createIndex2)
         execute(createKnowledgeIndex)
         execute(createRelationsIndex)
         execute(createRelationsIndex2)
+        execute(createRedactionIndex)
+        execute(createRedactionIndex2)
+
+        seedRedactionTemplates()
     }
 
     private func execute(_ sql: String) {
@@ -318,5 +352,97 @@ class TextcavatorDatabase {
         }
         sqlite3_finalize(stmt)
         return results
+    }
+
+    func saveRedactionAuditEntry(_ entry: RedactionAuditEntry) {
+        guard let db = db else { return }
+        let sql = """
+        INSERT OR REPLACE INTO redaction_audit_log (id, capture_id, region_id, tool, rect_x, rect_y, rect_width, rect_height, note_text, applied_at, exported_safe)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, entry.id.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 2, entry.captureId.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 3, entry.regionId.uuidString, -1, nil)
+            sqlite3_bind_text(stmt, 4, entry.tool.rawValue, -1, nil)
+            sqlite3_bind_double(stmt, 5, entry.rect.origin.x)
+            sqlite3_bind_double(stmt, 6, entry.rect.origin.y)
+            sqlite3_bind_double(stmt, 7, entry.rect.size.width)
+            sqlite3_bind_double(stmt, 8, entry.rect.size.height)
+            if let note = entry.noteText {
+                sqlite3_bind_text(stmt, 9, note, -1, nil)
+            } else {
+                sqlite3_bind_null(stmt, 9)
+            }
+            sqlite3_bind_double(stmt, 10, entry.appliedAt.timeIntervalSince1970)
+            sqlite3_bind_int(stmt, 11, entry.exportedSafe ? 1 : 0)
+            sqlite3_step(stmt)
+        }
+        sqlite3_finalize(stmt)
+    }
+
+    func updateAuditEntryExport(_ entryId: UUID, exportedSafe: Bool) {
+        guard let db = db else { return }
+        let sql = "UPDATE redaction_audit_log SET exported_safe = ? WHERE id = ?;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_int(stmt, 1, exportedSafe ? 1 : 0)
+            sqlite3_bind_text(stmt, 2, entryId.uuidString, -1, nil)
+            sqlite3_step(stmt)
+        }
+        sqlite3_finalize(stmt)
+    }
+
+    func auditLog(for captureId: UUID) -> [RedactionAuditEntry] {
+        var results: [RedactionAuditEntry] = []
+        guard let db = db else { return results }
+        let sql = "SELECT id, capture_id, region_id, tool, rect_x, rect_y, rect_width, rect_height, note_text, applied_at, exported_safe FROM redaction_audit_log WHERE capture_id = ? ORDER BY applied_at DESC;"
+        var stmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(stmt, 1, captureId.uuidString, -1, nil)
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                let idStr = String(cString: sqlite3_column_text(stmt, 0))
+                let captureStr = String(cString: sqlite3_column_text(stmt, 1))
+                let regionStr = String(cString: sqlite3_column_text(stmt, 2))
+                let toolStr = String(cString: sqlite3_column_text(stmt, 3))
+                let rx = sqlite3_column_double(stmt, 4)
+                let ry = sqlite3_column_double(stmt, 5)
+                let rw = sqlite3_column_double(stmt, 6)
+                let rh = sqlite3_column_double(stmt, 7)
+                let note = sqlite3_column_text(stmt, 8).map { String(cString: $0) }
+                let applied = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 9))
+                let exported = sqlite3_column_int(stmt, 10) != 0
+                if let id = UUID(uuidString: idStr), let capture = UUID(uuidString: captureStr), let region = UUID(uuidString: regionStr) {
+                    let rect = CGRect(x: rx, y: ry, width: rw, height: rh)
+                    let tool = RedactionTool(rawValue: toolStr) ?? .solid
+                    results.append(RedactionAuditEntry(id: id, captureId: capture, regionId: region, tool: tool, rect: rect, noteText: note, appliedAt: applied, exportedSafe: exported))
+                }
+            }
+        }
+        sqlite3_finalize(stmt)
+        return results
+    }
+
+    private func seedRedactionTemplates() {
+        let templates: [(String, RedactionTemplate)] = [
+            ("HIPAA Default", .hipaa),
+            ("GDPR Default", .gdpr),
+            ("Legal Default", .legal)
+        ]
+        for (name, template) in templates {
+            let id = UUID().uuidString
+            let sql = "INSERT OR IGNORE INTO redaction_templates (id, name, tool_set, config_json) VALUES (?, ?, ?, ?);"
+            var stmt: OpaquePointer?
+            if sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK {
+                sqlite3_bind_text(stmt, 1, id, -1, nil)
+                sqlite3_bind_text(stmt, 2, name, -1, nil)
+                let toolSet = template.defaultTools.map { $0.rawValue }.joined(separator: ",")
+                sqlite3_bind_text(stmt, 3, toolSet, -1, nil)
+                sqlite3_bind_text(stmt, 4, "{}", -1, nil)
+                sqlite3_step(stmt)
+            }
+            sqlite3_finalize(stmt)
+        }
     }
 }
