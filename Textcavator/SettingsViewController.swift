@@ -8,13 +8,17 @@ class SettingsViewController: NSViewController {
     private var launchAtLoginSwitch: NSSwitch!
     private var soundEffectsSwitch: NSSwitch!
     private var particleEffectsSwitch: NSSwitch!
+    private var autoSaveSwitch: NSSwitch!
+    private var darkPaletteSwitch: NSSwitch!
+    private var confidenceSlider: NSSlider!
+    private var confidenceLabel: NSTextField!
     
     var onClose: (() -> Void)?
     var onCaptureArea: (() -> Void)?
     var onCaptureWindow: (() -> Void)?
     
     override func loadView() {
-        view = CyberpunkCard(frame: NSRect(x: 0, y: 0, width: 480, height: 460))
+        view = CyberpunkCard(frame: NSRect(x: 0, y: 0, width: 480, height: 560))
         (view as? CyberpunkCard)?.glowColor = NSColor(calibratedRed: 0.8, green: 0.6, blue: 1.0, alpha: 1.0)
     }
     
@@ -98,8 +102,27 @@ class SettingsViewController: NSViewController {
         addSwitchRow(label: "Launch at Login", y: 100, switchView: &launchAtLoginSwitch, action: #selector(launchAtLoginToggled))
         addSwitchRow(label: "Soft HUD Sounds", y: 72, switchView: &soundEffectsSwitch, action: #selector(soundToggled))
         addSwitchRow(label: "Particle Effects", y: 44, switchView: &particleEffectsSwitch, action: #selector(effectsToggled))
-        
-        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: 12, width: 90, height: 28))
+        addSwitchRow(label: "Auto-save to Vault", y: 16, switchView: &autoSaveSwitch, action: #selector(autoSaveToggled))
+        addSwitchRow(label: "Dark Mode", y: -12, switchView: &darkPaletteSwitch, action: #selector(darkPaletteToggled))
+
+        let filterSectionLabel = createLabel(text: "OCR CONFIDENCE FILTER", fontSize: 11, weight: .medium)
+        filterSectionLabel.textColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
+        filterSectionLabel.frame = NSRect(x: 24, y: -50, width: 432, height: 16)
+        view.addSubview(filterSectionLabel)
+
+        confidenceLabel = createLabel(text: "Minimum Confidence: 50%", fontSize: 12, weight: .regular)
+        confidenceLabel.frame = NSRect(x: 24, y: -72, width: 432, height: 18)
+        view.addSubview(confidenceLabel)
+
+        confidenceSlider = NSSlider(frame: NSRect(x: 24, y: -96, width: 432, height: 20))
+        confidenceSlider.minValue = 0.0
+        confidenceSlider.maxValue = 1.0
+        confidenceSlider.doubleValue = 0.5
+        confidenceSlider.target = self
+        confidenceSlider.action = #selector(confidenceChanged)
+        view.addSubview(confidenceSlider)
+
+        let closeBtn = CyberpunkButton(frame: NSRect(x: 366, y: -140, width: 90, height: 28))
         closeBtn.title = "Done"
         closeBtn.glowColor = NSColor(calibratedRed: 0.0, green: 0.8, blue: 1.0, alpha: 1.0)
         closeBtn.target = self
@@ -155,14 +178,18 @@ class SettingsViewController: NSViewController {
     
     private func loadSettings() {
         let settings = SettingsManager.shared
-        
+
         outputModeSegment.selectedSegment = settings.outputMode == .clipboard ? 0 : 1
         folderPathField.stringValue = settings.outputFolder?.path ?? ""
         notificationsSwitch.state = settings.showNotifications ? .on : .off
         launchAtLoginSwitch.state = settings.launchAtLogin ? .on : .off
         soundEffectsSwitch.state = settings.soundEnabled ? .on : .off
         particleEffectsSwitch.state = settings.effectsEnabled ? .on : .off
-        
+        autoSaveSwitch.state = settings.autoSaveToDatabase ? .on : .off
+        darkPaletteSwitch.state = settings.darkPalette ? .on : .off
+        confidenceSlider.doubleValue = settings.minConfidence
+        confidenceLabel.stringValue = String(format: "Minimum Confidence: %.0f%%", settings.minConfidence * 100)
+
         updateFolderFieldVisibility()
     }
     
@@ -207,6 +234,20 @@ class SettingsViewController: NSViewController {
     @objc private func effectsToggled() {
         SettingsManager.shared.effectsEnabled = particleEffectsSwitch.state == .on
         UXSoundPlayer.shared.play(.select)
+    }
+
+    @objc private func autoSaveToggled() {
+        SettingsManager.shared.autoSaveToDatabase = autoSaveSwitch.state == .on
+    }
+
+    @objc private func darkPaletteToggled() {
+        SettingsManager.shared.darkPalette = darkPaletteSwitch.state == .on
+    }
+
+    @objc private func confidenceChanged() {
+        let value = confidenceSlider.doubleValue
+        SettingsManager.shared.minConfidence = value
+        confidenceLabel.stringValue = String(format: "Minimum Confidence: %.0f%%", value * 100)
     }
     
     @objc private func crosshairFlagClicked() {

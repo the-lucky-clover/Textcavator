@@ -16,6 +16,7 @@
 		BCDA6992E114D080BD4E5079 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5EC7B19B47D6740AACABD0 /* SettingsManager.swift */; };
 		D3B1F959B4C649009C9F595A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C397D43468E9B8CF8D3E95 /* AppDelegate.swift */; };
 		D56082D764AF7121CCB04A7A /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C885EF5E1FE77E337A30EF9 /* SettingsViewController.swift */; };
+		C7D1A9BBC3214ECAA344A44B /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 63205174872B43E89E1D234C /* libsqlite3.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,17 @@
 		BAFFA1921449A30708F0E3F6 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 		CE5EC7B19B47D6740AACABD0 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		D1696DADEBB331AA6324C05D /* ProgressPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressPopoverView.swift; sourceTree = "<group>"; };
+		93BCFB610C024A028597BE88 /* TextcavatorDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D238616097C4DD4B5CA4F2D /* TextcavatorDatabase.swift */; };
+		5D238616097C4DD4B5CA4F2D /* TextcavatorDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextcavatorDatabase.swift; sourceTree = "<group>"; };
+		2E14DC0C992248A5B7D22738 /* CaptureRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164A60194FD490D941A5952 /* CaptureRecord.swift */; };
+		2164A60194FD490D941A5952 /* CaptureRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureRecord.swift; sourceTree = "<group>"; };
+		82BBFB2C0FD04955B6393FC9 /* SearchWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC30C470D42A431E816DDD19 /* SearchWindowController.swift */; };
+		FC30C470D42A431E816DDD19 /* SearchWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchWindowController.swift; sourceTree = "<group>"; };
+		42A3FE72AFCC4004BAE54244 /* SearchResultViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECCF207B90E84B0EB23994BB /* SearchResultViewController.swift */; };
+		ECCF207B90E84B0EB23994BB /* SearchResultViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultViewController.swift; sourceTree = "<group>"; };
+		09FA5ED91B7F490483CC23DB /* CaptureDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C1245A58874FFB858CA368 /* CaptureDetailViewController.swift */; };
+		97C1245A58874FFB858CA368 /* CaptureDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDetailViewController.swift; sourceTree = "<group>"; };
+		63205174872B43E89E1D234C /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.c.objc"; path = libsqlite3.tbd; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -64,6 +76,11 @@
 				BAFFA1921449A30708F0E3F6 /* StatusBarController.swift */,
 				3AB9B4D64754ECA481C60542 /* Textcavator.entitlements */,
 				358BB61B0B115F7F022C4AA8 /* TextcavatorWindowController.swift */,
+							31473188204E425B8AEF35B1 /* TextcavatorDatabase.swift */,
+				8278E1E2CC8D4277AB58E0AF /* CaptureRecord.swift */,
+				FE9A8B9A6BE24457B6ABFAA0 /* SearchWindowController.swift */,
+				8692C8481C704EB9AAB724D7 /* SearchResultViewController.swift */,
+				DB32E770FD354103AE746590 /* CaptureDetailViewController.swift */,
 			);
 			path = Textcavator;
 			sourceTree = "<group>";
@@ -76,6 +93,7 @@
 			buildConfigurationList = 9FB844CB70AA95C21F152945 /* Build configuration list for PBXNativeTarget "Textcavator" */;
 			buildPhases = (
 				8287F293CF537AC37EA035E8 /* Sources */,
+				FF76AF2E11D54FE99D27B467 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -135,6 +153,11 @@
 				0AA92F98CE7120AD6483916D /* StatusBarController.swift in Sources */,
 				9A3677347651AAF169769300 /* TextcavatorWindowController.swift in Sources */,
 				16713789306F438EA083348A /* main.swift in Sources */,
+						0E11A7B86BE34BF1B1CCFB7F /* TextcavatorDatabase.swift in Sources */,
+			B9B2C67AEB514487B516C0EC /* CaptureRecord.swift in Sources */,
+			D7BC35280863473B977E9210 /* SearchWindowController.swift in Sources */,
+			A5FA48368F944B878EBFD801 /* SearchResultViewController.swift in Sources */,
+			0DDC0B9E8C35409C85E35A1C /* CaptureDetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

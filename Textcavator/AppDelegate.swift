@@ -12,6 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarController: StatusBarController!
     private var progressPopover: ProgressPopoverWindowController!
     private var settingsWindow: SettingsWindowController?
+    private var searchWindow: SearchWindowController?
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private var isCapturing = false
@@ -66,6 +67,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         statusBarController.onCaptureWindow = { [weak self] in
             self?.captureScreenshot(mode: .window)
+        }
+        
+        statusBarController.onOpenSearch = { [weak self] in
+            self?.openSearch()
         }
         
         statusBarController.onOpenSettings = { [weak self] in
@@ -220,8 +225,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let recognizedText = observations.compactMap { observation in
                     observation.topCandidates(1).first?.string
                 }.joined(separator: "\n")
-                
-                self.handleOutput(text: recognizedText)
+
+                let avgConfidence = observations.compactMap { obs in
+                    obs.topCandidates(1).first?.confidence
+                }.reduce(0.0, +) / Double(observations.count)
+
+                self.handleOutput(text: recognizedText, confidence: avgConfidence)
             }
         }
         
@@ -245,22 +254,52 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    private func handleOutput(text: String) {
+    private func handleOutput(text: String, confidence: Double = 0.0) {
         guard let progressPopover = progressPopover else { return }
         progressPopover.updateProgress(0.88, status: "Saving output...")
-        
+
         let settings = SettingsManager.shared
-        
+
+        saveToDatabase(text: text, confidence: confidence)
+
         switch settings.outputMode {
         case .clipboard:
             copyToClipboard(text: text)
         case .textFile:
             saveToTextFile(text: text)
         }
-        
+
         progressPopover.updateProgress(1.0, status: "Done")
         progressPopover.complete()
         UXSoundPlayer.shared.play(.complete)
+    }
+
+    private func saveToDatabase(text: String, confidence: Double) {
+        guard SettingsManager.shared.autoSaveToDatabase else { return }
+
+        let minConfidence = SettingsManager.shared.minConfidence
+        let shouldSave = confidence >= minConfidence || minConfidence == 0.0
+
+        let status: String
+        if shouldSave {
+            status = "complete"
+        } else {
+            status = "filtered"
+        }
+
+        let record = CaptureRecord(
+            imagePath: "/tmp/textcavator_last_capture.png",
+            width: 0,
+            height: 0,
+            sourceApp: "Unknown",
+            capturedAt: Date(),
+            ocrText: shouldSave ? text : nil,
+            confidence: confidence,
+            language: SettingsManager.shared.languageCode,
+            ocrStatus: status
+        )
+
+        TextcavatorDatabase.shared.saveCapture(record)
     }
     
     private func copyToClipboard(text: String) {
@@ -298,6 +337,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    private func openSearch() {
+        if searchWindow == nil {
+            searchWindow = SearchWindowController()
+            searchWindow?.onCaptureArea = { [weak self] in
+                self?.captureScreenshot(mode: .area)
+            }
+            searchWindow?.onCaptureWindow = { [weak self] in
+                self?.captureScreenshot(mode: .window)
+            }
+        }
+        searchWindow?.showWindow(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
     private func openSettings() {
         if settingsWindow == nil {
             settingsWindow = SettingsWindowController()

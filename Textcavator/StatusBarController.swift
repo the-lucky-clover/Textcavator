@@ -9,153 +9,9 @@ class StatusBarController {
     
     var onCaptureArea: (() -> Void)?
     var onCaptureWindow: (() -> Void)?
+    var onOpenSearch: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onQuit: (() -> Void)?
-    
-    init() {
-        setupStatusItem()
-        setupPopover()
-        setupEventMonitor()
-    }
-    
-    private func setupStatusItem() {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        
-        if let button = statusItem.button {
-            button.image = createStatusBarIcon()
-            button.image?.isTemplate = false
-            button.action = #selector(togglePopover)
-            button.target = self
-        }
-    }
-    
-    private func createStatusBarIcon() -> NSImage {
-        let size = NSSize(width: 22, height: 22)
-        let image = NSImage(size: size, flipped: false) { rect in
-            let gradient = NSGradient(colors: [
-                NSColor(calibratedRed: 0.0, green: 0.85, blue: 1.0, alpha: 1.0),
-                NSColor(calibratedRed: 0.72, green: 0.45, blue: 1.0, alpha: 1.0)
-            ])
-            gradient?.draw(in: rect, angle: 120)
-            
-            let screen = NSBezierPath(roundedRect: NSRect(x: 4, y: 5, width: 14, height: 10), xRadius: 2.5, yRadius: 2.5)
-            NSColor(white: 0.04, alpha: 0.9).setFill()
-            screen.fill()
-            
-            screen.lineWidth = 1.4
-            NSColor(calibratedRed: 0.0, green: 0.95, blue: 1.0, alpha: 0.95).setStroke()
-            screen.stroke()
-            
-            let crosshair = NSBezierPath()
-            crosshair.move(to: NSPoint(x: 11, y: 7.5))
-            crosshair.line(to: NSPoint(x: 11, y: 12.5))
-            crosshair.move(to: NSPoint(x: 8.5, y: 10))
-            crosshair.line(to: NSPoint(x: 13.5, y: 10))
-            crosshair.lineWidth = 1.2
-            NSColor(calibratedRed: 0.45, green: 1.0, blue: 0.62, alpha: 0.95).setStroke()
-            crosshair.stroke()
-            
-            let base = NSBezierPath(roundedRect: NSRect(x: 3, y: 3, width: 16, height: 2.2), xRadius: 1.1, yRadius: 1.1)
-            NSColor(white: 0.78, alpha: 0.9).setFill()
-            base.fill()
-            
-            return true
-        }
-        image.isTemplate = false
-        return image
-    }
-    
-    private func setupPopover() {
-        popover = NSPopover()
-        popover.behavior = .transient
-        popover.animates = true
-        
-        popoverViewController = StatusBarPopoverViewController()
-        popoverViewController.onCaptureArea = { [weak self] in
-            self?.closePopover()
-            self?.onCaptureArea?()
-        }
-        popoverViewController.onCaptureWindow = { [weak self] in
-            self?.closePopover()
-            self?.onCaptureWindow?()
-        }
-        popoverViewController.onOpenSettings = { [weak self] in
-            self?.closePopover()
-            self?.onOpenSettings?()
-        }
-        popoverViewController.onQuit = { [weak self] in
-            self?.closePopover()
-            self?.onQuit?()
-        }
-        
-        popover.contentViewController = popoverViewController
-        popover.contentSize = NSSize(width: 360, height: 620)
-    }
-    
-    private func setupEventMonitor() {
-        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            if self?.popover.isShown == true {
-                self?.closePopover()
-            }
-        }
-    }
-    
-    @objc private func togglePopover() {
-        if popover.isShown {
-            closePopover()
-        } else {
-            showPopover()
-        }
-    }
-    
-    func showPopover() {
-        if let button = statusItem.button {
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            popoverViewController.refreshLanguageButton()
-            popoverViewController.updateCaptureModeIndicator()
-        }
-    }
-    
-    func closePopover() {
-        popover.performClose(nil)
-    }
-    
-    func updateCaptureModeIndicator() {
-        popoverViewController.updateCaptureModeIndicator()
-    }
-    
-    deinit {
-        if let monitor = eventMonitor {
-            NSEvent.removeMonitor(monitor)
-        }
-    }
-}
-
-class StatusBarPopoverViewController: NSViewController {
-    
-    var onCaptureArea: (() -> Void)?
-    var onCaptureWindow: (() -> Void)?
-    var onOpenSettings: (() -> Void)?
-    var onQuit: (() -> Void)?
-    
-    private var flagMenuView: FlagMenuView!
-    private var languageAvatar: LanguageAvatarButton!
-    private var titleLabel: NSTextField!
-    private var subtitleLabel: NSTextField!
-    private var heroView: AnimatedHeroView!
-    private var headlineLabel: NSTextField!
-    private var subheadlineLabel: NSTextField!
-    private var areaButton: CyberpunkButton!
-    private var windowButton: CyberpunkButton!
-    private var captureModeLabel: NSTextField!
-    private var featuresTitleLabel: NSTextField!
-    private var localFeature: FeatureCardView!
-    private var privateFeature: FeatureCardView!
-    private var speedFeature: FeatureCardView!
-    private var globalFeature: FeatureCardView!
-    private var socialProofCard: CyberpunkCard!
-    private var settingsButton: CyberpunkButton!
-    private var quitButton: CyberpunkButton!
     
     override func loadView() {
         view = CyberpunkCard(frame: NSRect(x: 0, y: 0, width: 360, height: 620))
@@ -299,14 +155,21 @@ class StatusBarPopoverViewController: NSViewController {
         proofBody.frame = NSRect(x: 12, y: 6, width: 292, height: 12)
         socialProofCard.addSubview(proofBody)
         
-        settingsButton = CyberpunkButton(frame: NSRect(x: 22, y: 16, width: 130, height: 30))
+        let searchButton = CyberpunkButton(frame: NSRect(x: 22, y: 16, width: 140, height: 30))
+        searchButton.title = "Search Vault"
+        searchButton.glowColor = HUDPalette.amber
+        searchButton.target = self
+        searchButton.action = #selector(searchClicked)
+        view.addSubview(searchButton)
+        
+        settingsButton = CyberpunkButton(frame: NSRect(x: 166, y: 16, width: 120, height: 30))
         settingsButton.title = LocalizedText.value("settings")
         settingsButton.glowColor = HUDPalette.cyan
         settingsButton.target = self
         settingsButton.action = #selector(settingsClicked)
         view.addSubview(settingsButton)
         
-        quitButton = CyberpunkButton(frame: NSRect(x: 188, y: 16, width: 130, height: 30))
+        quitButton = CyberpunkButton(frame: NSRect(x: 290, y: 16, width: 60, height: 30))
         quitButton.title = "Quit"
         quitButton.glowColor = NSColor(calibratedRed: 1.0, green: 0.32, blue: 0.48, alpha: 1.0)
         quitButton.target = self
@@ -434,7 +297,12 @@ class StatusBarPopoverViewController: NSViewController {
         UXSoundPlayer.shared.play(.select)
         onCaptureWindow?()
     }
-    
+
+    @objc private func searchClicked() {
+        UXSoundPlayer.shared.play(.select)
+        onOpenSearch?()
+    }
+
     @objc private func settingsClicked() {
         onOpenSettings?()
     }

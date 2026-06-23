@@ -15,6 +15,9 @@ class SettingsManager {
         static let soundEnabled = "textcavator.soundEnabled"
         static let effectsEnabled = "textcavator.effectsEnabled"
         static let languageCode = "textcavator.languageCode"
+        static let minConfidence = "textcavator.minConfidence"
+        static let autoSaveToDatabase = "textcavator.autoSaveToDatabase"
+        static let darkPalette = "textcavator.darkPalette"
     }
     
     enum OutputMode: String {
@@ -100,7 +103,32 @@ class SettingsManager {
         get { defaults.string(forKey: Keys.languageCode) ?? "en-US" }
         set { defaults.set(newValue, forKey: Keys.languageCode) }
     }
-    
+
+    var minConfidence: Double {
+        get { defaults.double(forKey: Keys.minConfidence) }
+        set { defaults.set(newValue, forKey: Keys.minConfidence) }
+    }
+
+    var autoSaveToDatabase: Bool {
+        get {
+            if defaults.object(forKey: Keys.autoSaveToDatabase) == nil {
+                return true
+            }
+            return defaults.bool(forKey: Keys.autoSaveToDatabase)
+        }
+        set { defaults.set(newValue, forKey: Keys.autoSaveToDatabase) }
+    }
+
+    var darkPalette: Bool {
+        get {
+            if defaults.object(forKey: Keys.darkPalette) == nil {
+                return true
+            }
+            return defaults.bool(forKey: Keys.darkPalette)
+        }
+        set { defaults.set(newValue, forKey: Keys.darkPalette) }
+    }
+
     private init() {
         registerDefaults()
     }
@@ -113,10 +141,13 @@ class SettingsManager {
             Keys.captureMode: CaptureMode.area.rawValue,
             Keys.soundEnabled: true,
             Keys.effectsEnabled: true,
-            Keys.languageCode: "en-US"
+            Keys.languageCode: "en-US",
+            Keys.minConfidence: 0.5,
+            Keys.autoSaveToDatabase: true,
+            Keys.darkPalette: true
         ])
     }
-    
+
     func resetToDefaults() {
         defaults.removeObject(forKey: Keys.outputMode)
         defaults.removeObject(forKey: Keys.outputFolder)
@@ -126,5 +157,8 @@ class SettingsManager {
         defaults.removeObject(forKey: Keys.soundEnabled)
         defaults.removeObject(forKey: Keys.effectsEnabled)
         defaults.removeObject(forKey: Keys.languageCode)
+        defaults.removeObject(forKey: Keys.minConfidence)
+        defaults.removeObject(forKey: Keys.autoSaveToDatabase)
+        defaults.removeObject(forKey: Keys.darkPalette)
     }
 }
