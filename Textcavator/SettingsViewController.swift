@@ -54,14 +54,14 @@ class SettingsViewController: NSViewController, NSTextFieldDelegate {
         view.addSubview(flagSectionLabel)
         
         let crosshairFlagBtn = CyberpunkButton(frame: NSRect(x: 24, y: 322, width: 205, height: 32))
-        crosshairFlagBtn.title = "Crosshair Capture ⌘⇧1"
+        crosshairFlagBtn.title = "Crosshair Capture ⌃⌘⌥1"
         crosshairFlagBtn.glowColor = NSColor(calibratedRed: 0.0, green: 0.85, blue: 1.0, alpha: 1.0)
         crosshairFlagBtn.target = self
         crosshairFlagBtn.action = #selector(crosshairFlagClicked)
         view.addSubview(crosshairFlagBtn)
         
         let windowFlagBtn = CyberpunkButton(frame: NSRect(x: 251, y: 322, width: 205, height: 32))
-        windowFlagBtn.title = "Window Capture ⌘⇧2"
+        windowFlagBtn.title = "Window Capture ⌃⌘⌥2"
         windowFlagBtn.glowColor = NSColor(calibratedRed: 0.45, green: 1.0, blue: 0.65, alpha: 1.0)
         windowFlagBtn.target = self
         windowFlagBtn.action = #selector(windowFlagClicked)

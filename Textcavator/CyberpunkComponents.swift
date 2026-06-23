@@ -127,10 +127,10 @@ struct LocalizedText {
             "complete": "Complete!",
             "cancel": "Cancel",
             "welcome": "Welcome to Textcavator",
-            "onboarding": "Textcavator runs OCR locally with Apple Vision.\n\nTo use ⌘⇧1 and ⌘⇧2, grant:\n1. Screen Recording permission\n2. Accessibility permission for global hotkeys\n\nOpen System Settings now, or choose Later.",
+            "onboarding": "Textcavator runs OCR locally with Apple Vision.\n\nTo use ⌃⌘⌥1 and ⌃⌘⌥2, grant:\n1. Screen Recording permission\n2. Accessibility permission for global hotkeys\n\nOpen System Settings now, or choose Later.",
             "openSettings": "Open System Settings",
             "later": "Later",
-            "launchNotification": "Press ⌘⇧1 for crosshair capture or ⌘⇧2 for window capture",
+            "launchNotification": "Press ⌃⌘⌥1 for crosshair capture or ⌃⌘⌥2 for window capture",
             "copied": "Text copied to clipboard",
             "saved": "Saved to ",
             "failedSave": "Failed to save file: ",
@@ -160,7 +160,7 @@ struct LocalizedText {
             "statCloud": "0 cloud OCR",
             "statCloudCaption": "private by default",
             "statHotkeys": "2 hotkeys",
-            "statHotkeysCaption": "⌘⇧1 / ⌘⇧2",
+            "statHotkeysCaption": "⌃⌘⌥1 / ⌃⌘⌥2",
             "statOutput": "2 outputs",
             "statOutputCaption": "clipboard + file",
             "featuresTitle": "Features that feel instant",
@@ -207,10 +207,10 @@ struct LocalizedText {
             "complete": "Hoàn tất!",
             "cancel": "Hủy",
             "welcome": "Chào mừng đến với Textcavator",
-            "onboarding": "Textcavator chạy OCR cục bộ bằng Apple Vision.\n\nĐể dùng ⌘⇧1 và ⌘⇧2, hãy cấp:\n1. Quyền ghi màn hình\n2. Quyền Trợ năng cho phím nóng toàn cục\n\nMở Cài đặt hệ thống ngay, hoặc chọn Sau.",
+            "onboarding": "Textcavator chạy OCR cục bộ bằng Apple Vision.\n\nĐể dùng ⌃⌘⌥1 và ⌃⌘⌥2, hãy cấp:\n1. Quyền ghi màn hình\n2. Quyền Trợ năng cho phím nóng toàn cục\n\nMở Cài đặt hệ thống ngay, hoặc chọn Sau.",
             "openSettings": "Mở Cài đặt hệ thống",
             "later": "Sau",
-            "launchNotification": "Nhấn ⌘⇧1 để chụp vùng chọn hoặc ⌘⇧2 để chụp cửa sổ",
+            "launchNotification": "Nhấn ⌃⌘⌥1 để chụp vùng chọn hoặc ⌃⌘⌥2 để chụp cửa sổ",
             "copied": "Đã sao chép văn bản vào bảng nhớ tạm",
             "saved": "Đã lưu vào ",
             "failedSave": "Không lưu được tệp: ",
@@ -240,7 +240,7 @@ struct LocalizedText {
             "statCloud": "0 OCR đám mây",
             "statCloudCaption": "riêng tư mặc định",
             "statHotkeys": "2 phím tắt",
-            "statHotkeysCaption": "⌘⇧1 / ⌘⇧2",
+            "statHotkeysCaption": "⌃⌘⌥1 / ⌃⌘⌥2",
             "statOutput": "2 đầu ra",
             "statOutputCaption": "clipboard + tệp",
             "featuresTitle": "Các tính năng tức thì",
@@ -287,10 +287,10 @@ struct LocalizedText {
             "complete": "Complete!",
             "cancel": "Cancel",
             "welcome": "Zoo siab txais tos Textcavator",
-            "onboarding": "Textcavator siv Apple Vision OCR hauv koj lub Mac xwb.\n\nKom siv ⌘⇧1 thiab ⌘⇧2, cia permissions rau:\n1. Screen Recording\n2. Accessibility rau global hotkeys\n\nQhib System Settings os, lossis xaiv Later.",
+            "onboarding": "Textcavator siv Apple Vision OCR hauv koj lub Mac xwb.\n\nKom siv ⌃⌘⌥1 thiab ⌃⌘⌥2, cia permissions rau:\n1. Screen Recording\n2. Accessibility rau global hotkeys\n\nQhib System Settings os, lossis xaiv Later.",
             "openSettings": "Qhib System Settings",
             "later": "Later",
-            "launchNotification": "Nyem ⌘⇧1 los capture cheeb tsam lossis ⌘⇧2 los capture window",
+            "launchNotification": "Nyem ⌃⌘⌥1 los capture cheeb tsam lossis ⌃⌘⌥2 los capture window",
             "copied": "Copied text rau clipboard",
             "saved": "Saved to ",
             "failedSave": "Failed to save file: ",
@@ -320,7 +320,7 @@ struct LocalizedText {
             "statCloud": "0 cloud OCR",
             "statCloudCaption": "private by default",
             "statHotkeys": "2 hotkeys",
-            "statHotkeysCaption": "⌘⇧1 / ⌘⇧2",
+            "statHotkeysCaption": "⌃⌘⌥1 / ⌃⌘⌥2",
             "statOutput": "2 outputs",
             "statOutputCaption": "clipboard + file",
             "featuresTitle": "Features that feel instant",
@@ -367,10 +367,10 @@ struct LocalizedText {
             "complete": "Готово!",
             "cancel": "Отмена",
             "welcome": "Добро пожаловать в Textcavator",
-            "onboarding": "Textcavator выполняет OCR локально через Apple Vision.\n\nДля ⌘⇧1 и ⌘⇧2 нужны:\n1. Разрешение записи экрана\n2. Разрешение универсального доступа для горячих клавиш\n\nОткройте настройки системы сейчас или выберите позже.",
+            "onboarding": "Textcavator выполняет OCR локально через Apple Vision.\n\nДля ⌃⌘⌥1 и ⌃⌘⌥2 нужны:\n1. Разрешение записи экрана\n2. Разрешение универсального доступа для горячих клавиш\n\nОткройте настройки системы сейчас или выберите позже.",
             "openSettings": "Открыть настройки системы",
             "later": "Позже",
-            "launchNotification": "Нажмите ⌘⇧1 для области или ⌘⇧2 для окна",
+            "launchNotification": "Нажмите ⌃⌘⌥1 для области или ⌃⌘⌥2 для окна",
             "copied": "Текст скопирован в буфер обмена",
             "saved": "Сохранено в ",
             "failedSave": "Не удалось сохранить файл: ",
@@ -400,7 +400,7 @@ struct LocalizedText {
             "statCloud": "0 cloud OCR",
             "statCloudCaption": "приватно",
             "statHotkeys": "2 hotkeys",
-            "statHotkeysCaption": "⌘⇧1 / ⌘⇧2",
+            "statHotkeysCaption": "⌃⌘⌥1 / ⌃⌘⌥2",
             "statOutput": "2 вывода",
             "statOutputCaption": "буфер + файл",
             "featuresTitle": "Мгновенные функции",
@@ -1916,13 +1916,13 @@ class FlagMenuView: NSView {
         button.action = #selector(showMenu)
         addSubview(button)
 
-        let areaItem = NSMenuItem(title: "Crosshair Capture ⌘⇧1", action: #selector(areaSelected), keyEquivalent: "")
+        let areaItem = NSMenuItem(title: "Crosshair Capture ⌃⌘⌥1", action: #selector(areaSelected), keyEquivalent: "")
         areaItem.tag = 1
         captureMenu.addItem(areaItem)
-        let windowItem = NSMenuItem(title: "Window Capture ⌘⇧2", action: #selector(windowSelected), keyEquivalent: "")
+        let windowItem = NSMenuItem(title: "Window Capture ⌃⌘⌥2", action: #selector(windowSelected), keyEquivalent: "")
         windowItem.tag = 2
         captureMenu.addItem(windowItem)
-        let scrollItem = NSMenuItem(title: "Scroll Capture ⌘⇧3", action: #selector(scrollSelected), keyEquivalent: "")
+        let scrollItem = NSMenuItem(title: "Scroll Capture ⌃⌘⌥3", action: #selector(scrollSelected), keyEquivalent: "")
         scrollItem.tag = 3
         captureMenu.addItem(scrollItem)
         captureMenu.delegate = self

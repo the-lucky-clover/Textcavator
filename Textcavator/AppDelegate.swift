@@ -130,11 +130,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         let flags = event.flags
         let hasCommand = flags.contains(.maskCommand)
-        let hasShift = flags.contains(.maskShift)
         let hasControl = flags.contains(.maskControl)
         let hasOption = flags.contains(.maskAlternate)
-        
-        if hasCommand && hasShift && !hasControl && !hasOption {
+
+        if hasCommand && hasControl && hasOption {
             if keyCode == 18 {
                 DispatchQueue.main.async { [weak self] in
                     self?.captureScreenshot(mode: .area)
@@ -151,6 +150,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 return nil
             }
+        }
         }
         
         return Unmanaged.passRetained(event)
